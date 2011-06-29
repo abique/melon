@@ -16,11 +16,8 @@ extern "C" {
    * Melon runtime
    * @{
    */
-  void melon_init();
+  void melon_init(int nb_threads);
   void melon_deinit();
-
-  void melon_set_nbthreads(uint32_t nb_threads);
-  uint32_t melon_get_nbthreads();
 
   void melon_start_fiber(void (*fct)(void *), void * ctx);
 
@@ -37,17 +34,17 @@ extern "C" {
   void melon_mutex_destroy(struct melon_mutex * mutex);
   void melon_mutex_lock(struct melon_mutex * mutex);
   void melon_mutex_unlock(struct melon_mutex * mutex);
-  bool melon_mutex_trylock(struct melon_mutex * mutex);
-  bool melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
+  int melon_mutex_trylock(struct melon_mutex * mutex);
+  int melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
 
   struct melon_rwlock * melon_rwlock_new();
   void melon_rwlock_destroy(struct melon_rwlock * rwlock);
   void melon_rwlock_rdlock(struct melon_rwlock * rwlock);
-  bool melon_rwlock_tryrdlock(struct melon_rwlock * rwlock);
-  bool melon_rwlock_timedrdlock(struct melon_rwlock * rwlock, uint64_t timeout);
+  int melon_rwlock_tryrdlock(struct melon_rwlock * rwlock);
+  int melon_rwlock_timedrdlock(struct melon_rwlock * rwlock, uint64_t timeout);
   void melon_rwlock_wrlock(struct melon_rwlock * rwlock);
-  bool melon_rwlock_trywrlock(struct melon_rwlock * rwlock);
-  bool melon_rwlock_timedwrlock(struct melon_rwlock * rwlock, uint64_t timeout);
+  int melon_rwlock_trywrlock(struct melon_rwlock * rwlock);
+  int melon_rwlock_timedwrlock(struct melon_rwlock * rwlock, uint64_t timeout);
   void melon_rwlock_unlock(struct melon_rwlock * rwlock);
 
   struct melon_cond * melon_cond_new();
@@ -76,7 +73,7 @@ extern "C" {
   ssize_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset, uint64_t timeout);
 
   int melon_connect(int socket, const struct sockaddr *address, uint64_t timeout);
-  int melon_accept(int socket, struct sockaddr * address, socklen_t * address_len, uint64_t timeout);
+  int melon_accept(int socket, struct sockaddr * restrict address, socklen_t * restrict address_len, uint64_t timeout);
   ssize_t melon_sendto(int socket, const void *message, size_t length,
                        int flags, const struct sockaddr *dest_addr,
                        socklen_t dest_len, uint64_t timeout);

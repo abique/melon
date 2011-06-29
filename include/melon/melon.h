@@ -1,0 +1,216 @@
+#ifndef MELON_MELON_H
+# define MELON_MELON_H
+
+# include <stdint.h>
+# include <unistd.h>
+# include <sys/uio.h>
+# include <sys/socket.h>
+# include <sys/sendfile.h>
+# include <fcntl.h>
+
+# ifdef __cplusplus
+extern "C" {
+# endif
+
+  /**
+   * Melon runtime
+   * @{
+   */
+  void melon_init();
+  void melon_deinit();
+
+  void melon_set_nbthreads(uint32_t nb_threads);
+  uint32_t melon_get_nbthreads();
+
+  void melon_start_fiber(void (*fct)(void *), void * ctx);
+
+  uint64_t melon_time();
+  void melon_time_setfunc(uint64_t (*fct)(void *), void * ctx);
+  void melon_yield();
+  /** @} */
+
+  /**
+   * Synchronisation functions
+   * @{
+   */
+  struct melon_mutex * melon_mutex_new();
+  void melon_mutex_destroy(struct melon_mutex * mutex);
+  void melon_mutex_lock(struct melon_mutex * mutex);
+  void melon_mutex_unlock(struct melon_mutex * mutex);
+  bool melon_mutex_trylock(struct melon_mutex * mutex);
+  bool melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
+
+  struct melon_rwlock * melon_rwlock_new();
+  void melon_rwlock_destroy(struct melon_rwlock * rwlock);
+  void melon_rwlock_rdlock(struct melon_rwlock * rwlock);
+  bool melon_rwlock_tryrdlock(struct melon_rwlock * rwlock);
+  bool melon_rwlock_timedrdlock(struct melon_rwlock * rwlock, uint64_t timeout);
+  void melon_rwlock_wrlock(struct melon_rwlock * rwlock);
+  bool melon_rwlock_trywrlock(struct melon_rwlock * rwlock);
+  bool melon_rwlock_timedwrlock(struct melon_rwlock * rwlock, uint64_t timeout);
+  void melon_rwlock_unlock(struct melon_rwlock * rwlock);
+
+  struct melon_cond * melon_cond_new();
+  void melon_cond_destroy(struct melon_cond * condition);
+  void melon_cond_wait(struct melon_cond * condition);
+  void melon_cond_timedwait(struct melon_cond * condition, uint64_t timeout);
+  void melon_cond_signal(struct melon_cond * condition);
+  void melon_cond_broadcast(struct melon_cond * condition);
+  /** @} */
+
+  /**
+   * POSIX functions
+   * @{
+   */
+  uint32_t melon_sleep(uint32_t secs);
+  int melon_usleep(uint64_t usecs);
+
+  ssize_t melon_write(int fildes, const void * data, size_t nbyte, uint64_t timeout);
+  ssize_t melon_pwrite(int fildes, const void * data, size_t nbyte, off_t offset, uint64_t timeout);
+  ssize_t melon_writev(int fildes, const struct iovec *iov, int iovcnt, uint64_t timeout);
+  ssize_t melon_pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset, uint64_t timeout);
+
+  ssize_t melon_read(int fildes, void * data, size_t nbyte, uint64_t timeout);
+  ssize_t melon_pread(int fildes, void * data, size_t nbyte, off_t offset, uint64_t timeout);
+  ssize_t melon_readv(int fildes, const struct iovec *iov, int iovcnt, uint64_t timeout);
+  ssize_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset, uint64_t timeout);
+
+  int melon_connect(int socket, const struct sockaddr *address, uint64_t timeout);
+  int melon_accept(int socket, struct sockaddr * address, socklen_t * address_len, uint64_t timeout);
+  ssize_t melon_sendto(int socket, const void *message, size_t length,
+                       int flags, const struct sockaddr *dest_addr,
+                       socklen_t dest_len, uint64_t timeout);
+  ssize_t melon_recvfrom(int socket, void *restrict buffer, size_t length,
+                         int flags, struct sockaddr * address,
+                         socklen_t * address_len, uint64_t timeout);
+  ssize_t melon_recvmsg(int socket, struct msghdr *message, int flags, uint64_t timeout);
+  ssize_t melon_sendmsg(int socket, const struct msghdr *message, int flags);
+
+#if 0
+  ssize_t melon_sendfile(int out_fd, int in_fd, off_t *offset, size_t count, uint64_t timeout);
+
+#  ifdef _GNU_SOURCE
+  ssize_t melon_splice(int fd_in, loff_t *off_in, int fd_out,
+                       loff_t *off_out, size_t len, unsigned int flags, uint64_t timeout);
+  ssize_t melon_tee(int fd_in, int fd_out, size_t len, unsigned int flags, uint64_t timeout);
+  ssize_t melon_vmsplice(int fd, const struct iovec *iov,
+                         unsigned long nr_segs, unsigned int flags, uint64_t timeout);
+#  endif
+# endif /* later */
+
+  /** @} */
+
+# ifdef MELON_OVERRIDE_POSIX
+
+#  ifdef sleep
+#   undef sleep
+#  endif
+#  define sleep(Args...) melon_sleep(Args)
+
+#  ifdef usleep
+#   undef usleep
+#  endif
+#  define usleep(Args...) melon_usleep(Args)
+
+/*
+
+for func in \
+write pwrite writev prwitev \
+read pread readv preadv \
+connect accept \
+sendto sendmsg recvfrom recvmsg \
+splice
+do
+cat <<EOF
+#  ifdef $func
+#   undef $func
+#  endif
+#  define $func(Args...) melon_$func(Args, 0)
+
+EOF
+done
+
+ */
+
+#  ifdef write
+#   undef write
+#  endif
+#  define write(Args...) melon_write(Args, 0)
+
+#  ifdef pwrite
+#   undef pwrite
+#  endif
+#  define pwrite(Args...) melon_pwrite(Args, 0)
+
+#  ifdef writev
+#   undef writev
+#  endif
+#  define writev(Args...) melon_writev(Args, 0)
+
+#  ifdef prwitev
+#   undef prwitev
+#  endif
+#  define prwitev(Args...) melon_prwitev(Args, 0)
+
+#  ifdef read
+#   undef read
+#  endif
+#  define read(Args...) melon_read(Args, 0)
+
+#  ifdef pread
+#   undef pread
+#  endif
+#  define pread(Args...) melon_pread(Args, 0)
+
+#  ifdef readv
+#   undef readv
+#  endif
+#  define readv(Args...) melon_readv(Args, 0)
+
+#  ifdef preadv
+#   undef preadv
+#  endif
+#  define preadv(Args...) melon_preadv(Args, 0)
+
+#  ifdef connect
+#   undef connect
+#  endif
+#  define connect(Args...) melon_connect(Args, 0)
+
+#  ifdef accept
+#   undef accept
+#  endif
+#  define accept(Args...) melon_accept(Args, 0)
+
+#  ifdef sendto
+#   undef sendto
+#  endif
+#  define sendto(Args...) melon_sendto(Args, 0)
+
+#  ifdef sendmsg
+#   undef sendmsg
+#  endif
+#  define sendmsg(Args...) melon_sendmsg(Args, 0)
+
+#  ifdef recvfrom
+#   undef recvfrom
+#  endif
+#  define recvfrom(Args...) melon_recvfrom(Args, 0)
+
+#  ifdef recvmsg
+#   undef recvmsg
+#  endif
+#  define recvmsg(Args...) melon_recvmsg(Args, 0)
+
+#  ifdef splice
+#   undef splice
+#  endif
+#  define splice(Args...) melon_splice(Args, 0)
+
+# endif /* MELON_OVERRIDE_POSIX */
+
+# ifdef __cplusplus
+}
+# endif
+
+#endif /* !MELON_MELON_H */

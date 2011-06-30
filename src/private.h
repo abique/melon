@@ -2,30 +2,33 @@
 # define MELON_PRIVATE_H
 
 # include <pthread.h>
-# include <sys/epoll.h>
 # include <ucontext.h>
 
 # include "melon.h"
+
+# define UNUSED __attribute__((unused))
 
 # ifdef __cplusplus
 extern "C" {
 # endif
 
-  struct melon_io_manager
-  {
-    int                epoll_fd;
-    struct epoll_event events[256];
-    pthread_t          thread;
-  };
-
   enum MelonEvent
   {
-    IoRead,
-    IoWrite,
-    IoClose,
-    IoError,
-    MutexUnlock,
-    CondSignal,
+    kNone,
+    kIoRead,
+    kIoWrite,
+  };
+
+  enum MelonFiberState
+  {
+    kInit,
+    kReady,
+    kRunning,
+    kIoWaiting,
+    kMutexWaiting,
+    kCondWaiting,
+    kSleeping,
+    kFinished
   };
 
   struct melon_event
@@ -36,17 +39,26 @@ extern "C" {
 
   struct melon_fiber
   {
-    ucontext_t ctx;
+    struct melon_fiber * next;
+    enum MelonFiberState state;
+    ucontext_t           ctx;
+    enum MelonEvent      waited_event;
   };
 
   struct melon
   {
-    struct melon_io_manager io_manager;
+    pthread_mutex_t mutex;
 
-    pthread_mutex_t      events_mutex;
-    pthread_cond_t       events_cond;
-    struct melon_event * events_head;
-    struct melon_event * events_tail;
+    int epoll_fd;
+    pthread_t epoll_thread;
+
+    /* ready queue */
+    struct melon_fiber * ready_head;
+    struct melon_fiber * ready_tail;
+
+    /* vector of linked list of fiber waiting for io events
+     * n producers, 1 consumer */
+    struct melon_fiber **  io_blocked;
 
     uint32_t    threads_nb;
     pthread_t * threads;
@@ -56,17 +68,22 @@ extern "C" {
   {
   };
 
+  struct melon_rwmutex
+  {
+  };
+
   struct melon_cond
   {
   };
 
   extern struct melon g_melon;
 
-  void melon_io_manager_init(struct melon_io_manager * io_manager);
-  void melon_io_manager_deinit(struct melon_io_manager * io_manager);
-
   void * melon_sched_run(void *);
   int melon_sched_next();
+
+  void melon_io_manager_init();
+  void melon_io_manager_loop(void *)
+  void melon_io_manager_deinit();
 
 # ifdef __cplusplus
 }

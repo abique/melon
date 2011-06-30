@@ -16,10 +16,12 @@ extern "C" {
    * Melon runtime
    * @{
    */
-  void melon_init(int nb_threads);
+  void melon_init(uint16_t nb_threads);
   void melon_deinit();
 
-  void melon_start_fiber(void (*fct)(void *), void * ctx);
+  struct melon_fiber * melon_start_fiber(void (*fct)(void *), void * ctx);
+  void melon_fiber_join(struct melon_fiber * fiber);
+  void melon_fiber_detach(struct melon_fiber * fiber);
 
   uint64_t melon_time();
   void melon_time_setfunc(uint64_t (*fct)(void *), void * ctx);

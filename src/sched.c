@@ -1,6 +1,6 @@
 #include "private.h"
 
-void * melon_sched_run(void *)
+void * melon_sched_run(void * dummy __attribute__((unused)))
 {
   while (melon_sched_next())
     continue;
@@ -9,5 +9,5 @@ void * melon_sched_run(void *)
 
 int melon_sched_next()
 {
-  return true;
+  return 1;
 }

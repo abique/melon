@@ -1,8 +1,12 @@
-PROJECT(melon C)
+cmake_minimum_required(VERSION 2.8)
 
-ADD_DEFINITIONS(-D_GNU_SOURCE)
+project(melon C)
 
-ADD_LIBRARY(melon
-  src/io_manager.c
+add_definitions(-D_GNU_SOURCE -std=c99 -Wall -Wextra)
+
+add_library(melon
   src/melon.c
-  src/sched.c)
+  src/sched.c
+
+  #src/io_manager.c
+)

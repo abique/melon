@@ -16,16 +16,31 @@ extern "C" {
    * Melon runtime
    * @{
    */
-  void melon_init(uint16_t nb_threads);
+  /** initializes melon runtime
+   * @return 0 on success, non zero else */
+  int melon_init(uint16_t nb_threads);
   void melon_deinit();
 
   struct melon_fiber * melon_start_fiber(void (*fct)(void *), void * ctx);
   void melon_fiber_join(struct melon_fiber * fiber);
   void melon_fiber_detach(struct melon_fiber * fiber);
+  struct melon_fiber * melon_self_fiber();
 
-  uint64_t melon_time();
-  void melon_time_setfunc(uint64_t (*fct)(void *), void * ctx);
+  /** schedules next fibers and put the current one in the back
+   * of the ready queue */
   void melon_yield();
+
+  typedef int64_t melon_time_t;
+  typedef melon_time_t (*melon_time_f)(void * ctx);
+  /** sets the callback to get the current time */
+  void melon_time_setfunc(melon_time_f time_fct, void * ctx);
+  /** gets the time in nanoseconds */
+  melon_time_t melon_time();
+  /** sets the time resolution of timeouts checks
+   * @return the effective time resolution */
+  melon_time_t melon_set_timeresolution(melon_time_t res);
+  /** gets the time resolution of timeouts checks */
+  melon_time_t melon_get_timeresolution();
   /** @} */
 
   /**

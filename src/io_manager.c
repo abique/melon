@@ -1,66 +1,55 @@
 #include <sys/epoll.h>
+#include <assert.h>
 
 #include "private.h"
 
-void melon_io_manager_init()
+int melon_io_manager_init(void)
 {
-  int ret = pthread_create(&g_melon.epoll_thread, 0, melon_io_manager_loop, 0);
-  assert(!ret);
+  if (pthread_create(&g_melon.epoll_thread, 0, melon_io_manager_loop, NULL))
+    return -1;
+  return 0;
 }
 
 static void melon_io_manager_handle(struct epoll_event * event)
 {
-  melon_fiber ** fiber = g_melon.io_blocked + event->fd;
+  melon_fiber * fiber     = g_melon.io_blocked[event->data.fd];
+  melon_fiber * tmp_fiber = NULL;
 
-  while (*fiber)
+  while (fiber)
   {
     if ((event->events & (EPOLLRDHUP | EPOLLERR | EPOLLHUP)) ||
-        ((*fiber)->waited_event == kIoRead && (event->events & (EPOLLIN | EPOLLPRI))) ||
-        ((*fiber)->waited_event == kIoWrite && (event->events & (EPOLLOUT))))
+        (fiber->waited_event == kIoRead && (event->events & (EPOLLIN | EPOLLPRI))) ||
+        (fiber->waited_event == kIoWrite && (event->events & (EPOLLOUT))))
     {
-      (*fiber)->waited_event = kNone;
-
-      if (!g_melon.ready_head)
-      {
-        g_melon.ready_head = *fiber;
-        g_melon.ready_tail = *fiber;
-      }
-      else
-      {
-        assert(!g_melon.ready_tail);
-        g_melon.ready_tail->next = *fiber;
-        g_melon.ready_tail = *fiber;
-      }
-
-      *fiber = (*fiber)->next;
-      g_melon.ready_tail->next = 0;
+      tmp_fiber           = fiber;
+      fiber->waited_event = kNone;
+      fiber               = fiber->next;
+      melon_list_push(g_melon.ready, tmp_fiber);
     }
     else
-      fiber = &(*fiber)->next;
+      fiber = fiber->next;
   }
 }
 
-void * melon_io_manager_loop(void * dummy UNUSED)
+void * melon_io_manager_loop(void * dummy)
 {
+  (void)dummy;
+
   struct epoll_event events[256];
 
-  g_melon.io_manager.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
-  if (g_melon.io_manager.epoll_fd < 0)
-  {
-    // TODO: handle error
-    assert(g_melon.io_manager.epoll_fd >= 0);
-    return 0;
-  }
+  g_melon.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  if (g_melon.epoll_fd < 0)
+    return NULL;
 
-  while (!g_melon.io_manager.stop)
+  while (!g_melon.stop)
   {
-    int count = epoll_wait(g_melon.io_manager.epoll_fd, events,
+    int count = epoll_wait(g_melon.epoll_fd, events,
                            sizeof (events) / sizeof (events[0]), -1);
 
     if (count < 0)
     {
-      if (g_melon.io_manager.stop)
-        return 0;
+      if (g_melon.stop)
+        return NULL;
       melon_yield();
       continue;
     }
@@ -75,6 +64,9 @@ void * melon_io_manager_loop(void * dummy UNUSED)
   return 0;
 }
 
-void melon_io_manager_deinit()
+void melon_io_manager_deinit(void)
 {
+  close(g_melon.epoll_fd);
+  g_melon.epoll_fd = -1;
+  pthread_join(g_melon.epoll_thread, NULL);
 }

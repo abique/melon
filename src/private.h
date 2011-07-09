@@ -12,9 +12,9 @@ extern "C" {
 
   typedef enum MelonEvent
   {
-    kNone,
-    kIoRead,
-    kIoWrite,
+    kEventNone,
+    kEventIoRead,
+    kEventIoWrite,
   } MelonEvent;
 
   /* enum MelonFiberState */

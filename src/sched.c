@@ -37,8 +37,3 @@ void melon_sched_next(void)
 
   swapcontext(&g_root_ctx, &g_current_fiber->ctx);
 }
-
-melon_fiber * melon_fiber_self(void)
-{
-  return g_current_fiber;
-}

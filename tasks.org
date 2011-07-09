@@ -1,6 +1,12 @@
 * Runtime
+** TODO global init/deinit
+** TODO fiber_start/fiber_detach/fiber_join
+** TODO mutex_lock/mutex_unlock
+** TODO cond_wait/cond_notify*
+** TODO timer manager
 ** TODO io manager
-** TODO scheduler
+** DONE scheduler
+   CLOSED: [2011-07-09 Sat 23:01]
 
 * POSIX interfaces
 ** TODO melon_sleep()
@@ -22,3 +28,9 @@
 
 * Linux interfaces
 ** TODO sendfile/splice/tee/vmsplice
+
+* Test suite
+** TODO find the test framework
+** TODO test fiber_start/fiber_detach/fiber_join
+** TODO test mutex_lock/mutex_unlock
+** TODO test cond_wait/cond_notify*

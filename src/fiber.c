@@ -46,7 +46,11 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   }
 
   /* initialize the context */
-  makecontext(&fiber->ctx, fct, 1, ctx);
+  makecontext(&fiber->ctx, (void (*)(void))fct, 1, ctx);
+
+  pthread_mutex_lock(&g_melon.mutex);
+  melon_list_push(g_melon.ready, fiber);
+  pthread_mutex_unlock(&g_melon.mutex);
   return fiber;
 }
 

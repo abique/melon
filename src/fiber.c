@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "private.h"
 
@@ -16,6 +17,38 @@
 melon_fiber * melon_fiber_self(void)
 {
   return g_current_fiber;
+}
+
+static void melon_fiber_destroy(melon_fiber * fiber)
+{
+  munmap(fiber->ctx.uc_stack.ss_sp, fiber->ctx.uc_stack.ss_size);
+  free(fiber);
+}
+
+static void melon_fiber_wrapper(void (*fct)(void *), void * ctx)
+{
+  fct(ctx);
+
+  /* now join or destroy */
+  melon_fiber * self = melon_fiber_self();
+  pthread_mutex_lock(&g_melon.mutex);
+  if (self->is_detached)
+  {
+    /* push in the destroy queue */
+    self->waited_event = kEventDestroy;
+    melon_list_push(g_melon.destroy, self);
+  }
+  else
+  {
+    self->waited_event = kEventJoin;
+    if (self->terminate_waiter)
+    {
+      /* a fiber is waiting for us, let's activate it ! */
+      self->terminate_waiter->waited_event = kEventNone;
+      melon_list_push(g_melon.ready, self->terminate_waiter);
+    }
+  }
+  pthread_mutex_unlock(&g_melon.mutex);
 }
 
 melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
@@ -33,7 +66,7 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
     return NULL;
   fiber->waited_event = kEventNone;
 
-  /* allocate the stack */
+  /* allocate the stack, TODO: have a stack allocator with a cache */
   fiber->ctx.uc_link = NULL;
   fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
   fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
@@ -46,7 +79,7 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   }
 
   /* initialize the context */
-  makecontext(&fiber->ctx, (void (*)(void))fct, 1, ctx);
+  makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper, 2, fct, ctx);
 
   pthread_mutex_lock(&g_melon.mutex);
   melon_list_push(g_melon.ready, fiber);
@@ -54,12 +87,63 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   return fiber;
 }
 
-void melon_fiber_join(struct melon_fiber * fiber)
+void melon_fiber_join(melon_fiber * fiber)
 {
   assert(fiber);
+  pthread_mutex_lock(&g_melon.mutex);
+  if (fiber->waited_event == kEventJoin)
+  {
+    pthread_mutex_unlock(&g_melon.mutex);
+    melon_fiber_destroy(fiber);
+  }
+  else
+  {
+    /* check that the user doesn't join the fiber from two differents fibers */
+    if (fiber->terminate_waiter)
+    {
+      fprintf(stderr, "panic: it's incorrect to join the same fiber from two differents fibers\n");
+      fflush(stderr);
+      abort();
+    }
+
+    if (fiber->is_detached)
+    {
+      fprintf(stderr, "panic: it's incorrect to join a detached fiber\n");
+      fflush(stderr);
+      abort();
+    }
+
+    melon_fiber * self = melon_fiber_self();
+    fiber->terminate_waiter = self;
+    /* now let's wait for the fiber to finish */
+    melon_sched_next();
+    /* here the fiber has been waked up so the fiber is finished !
+     * We have the responsability to free the fiber. */
+    melon_fiber_destroy(fiber);
+  }
 }
 
-void melon_fiber_detach(struct melon_fiber * fiber)
+int melon_fiber_tryjoin(melon_fiber * fiber)
 {
   assert(fiber);
+  pthread_mutex_lock(&g_melon.mutex);
+  if (fiber->waited_event == kEventJoin)
+  {
+    pthread_mutex_unlock(&g_melon.mutex);
+    melon_fiber_destroy(fiber);
+    return 1;
+  }
+  pthread_mutex_unlock(&g_melon.mutex);
+  return 0;
+}
+
+void melon_fiber_detach(melon_fiber * fiber)
+{
+  assert(fiber);
+  pthread_mutex_lock(&g_melon.mutex);
+  if (fiber->waited_event == kEventJoin)
+    melon_fiber_destroy(fiber);
+  else
+    fiber->is_detached = 1;
+  pthread_mutex_unlock(&g_melon.mutex);
 }

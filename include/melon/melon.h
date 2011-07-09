@@ -23,6 +23,8 @@ extern "C" {
 
   struct melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
   void melon_fiber_join(struct melon_fiber * fiber);
+  /** non blocking version of join, returns 0 on failure and 1 on success */
+  int melon_fiber_tryjoin(struct melon_fiber * fiber);
   void melon_fiber_detach(struct melon_fiber * fiber);
   struct melon_fiber * melon_fiber_self(void);
 

@@ -15,6 +15,9 @@ extern "C" {
     kEventNone,
     kEventIoRead,
     kEventIoWrite,
+    kEventJoin, // the fiber terminate and is waiting for another fiber to join it
+    kEventTerminate, // the fiber joined another and is waiting for the other to terminate
+    kEventDestroy,
   } MelonEvent;
 
   /* enum MelonFiberState */
@@ -35,12 +38,26 @@ extern "C" {
     enum MelonEvent      event;
   } melon_event;
 
+  typedef struct melon_mutex
+  {
+  } melon_mutex;
+
+  typedef struct melon_rwmutex
+  {
+  } melon_rwmutex;
+
+  typedef struct melon_cond
+  {
+  } melon_cond;
+
   typedef struct melon_fiber
   {
     struct melon_fiber * next; // usefull for intrusive linking
     uint64_t             timeout;
     ucontext_t           ctx;
     MelonEvent           waited_event;
+    int                  is_detached;
+    struct melon_fiber * terminate_waiter;
   } melon_fiber;
 
   typedef struct melon
@@ -49,12 +66,15 @@ extern "C" {
     pthread_mutex_t mutex;
 
     /* ready queue */
-    struct melon_fiber * ready;
-    pthread_cond_t       ready_cond;
+    melon_fiber *  ready;
+    pthread_cond_t ready_cond;
+
+    /* queue of fibers to be destroyed */
+    melon_fiber * destroy;
 
     /* vector of linked list of fiber waiting for io events
      * n producers, 1 consumer */
-    struct melon_fiber ** io_blocked;
+    melon_fiber ** io_blocked;
 
     /* epoll stuff */
     int       epoll_fd;
@@ -73,21 +93,13 @@ extern "C" {
     int stop;
   } melon;
 
-  typedef struct melon_mutex
-  {
-  } melon_mutex;
-
-  typedef struct melon_rwmutex
-  {
-  } melon_rwmutex;
-
-  typedef struct melon_cond
-  {
-  } melon_cond;
-
   extern melon g_melon;
 
+  /** Loop which executes ready fibers */
   void * melon_sched_run(void *);
+  /** Schedule the next fiber and stops the current (if there is one).
+   * The old fiber will not be put in the ready queue like yield would do,
+   * so think to a mechanism to wake up the old fiber. */
   void melon_sched_next(void);
 
   /** @return 0 on succees */

@@ -21,10 +21,10 @@ extern "C" {
   int melon_init(uint16_t nb_threads);
   void melon_deinit();
 
-  struct melon_fiber * melon_start_fiber(void (*fct)(void *), void * ctx);
+  struct melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
   void melon_fiber_join(struct melon_fiber * fiber);
   void melon_fiber_detach(struct melon_fiber * fiber);
-  struct melon_fiber * melon_self_fiber();
+  struct melon_fiber * melon_fiber_self(void);
 
   /** schedules next fibers and put the current one in the back
    * of the ready queue */

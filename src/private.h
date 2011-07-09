@@ -88,7 +88,7 @@ extern "C" {
   extern melon g_melon;
 
   void * melon_sched_run(void *);
-  int melon_sched_next(void);
+  void melon_sched_next(void);
 
   /** @return 0 on succees */
   int melon_io_manager_init(void);
@@ -99,6 +99,9 @@ extern "C" {
   int melon_timer_manager_init(void);
   void * melon_timer_manager_loop(void *);
   void melon_timer_manager_deinit(void);
+
+  extern __thread melon_fiber * g_current_fiber;
+  extern __thread ucontext_t    g_root_ctx;
 
   // circular linked list
 # define melon_list_push(List, Item)            \

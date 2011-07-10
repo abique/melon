@@ -48,6 +48,10 @@ static void melon_fiber_wrapper(void (*fct)(void *), void * ctx)
       melon_list_push(g_melon.ready, self->terminate_waiter);
     }
   }
+
+  /* decrement the fibers count and if 0, then broadcast the cond */
+  if (--g_melon.fibers_count == 0)
+    pthread_cond_broadcast(&g_melon.fibers_count_zero);
   pthread_mutex_unlock(&g_melon.mutex);
 }
 
@@ -82,6 +86,7 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper, 2, fct, ctx);
 
   pthread_mutex_lock(&g_melon.mutex);
+  ++g_melon.fibers_count;
   melon_list_push(g_melon.ready, fiber);
   pthread_mutex_unlock(&g_melon.mutex);
   return fiber;

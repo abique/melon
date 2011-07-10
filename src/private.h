@@ -88,6 +88,8 @@ extern "C" {
     /* the time func */
     melon_time_f time_func;
     void *       time_ctx;
+    pthread_t    timer_thread;
+    melon_time_t timer_resolution;
 
     /* stop the runtime */
     int stop;

@@ -19,7 +19,7 @@ melon_fiber * melon_fiber_self(void)
   return g_current_fiber;
 }
 
-static void melon_fiber_destroy(melon_fiber * fiber)
+void melon_fiber_destroy(melon_fiber * fiber)
 {
   munmap(fiber->ctx.uc_stack.ss_sp, fiber->ctx.uc_stack.ss_size);
   free(fiber);

@@ -13,7 +13,7 @@ add_library(melon
   src/io_manager.c
   src/timer_manager.c
 )
-target_link_libraries(melon pthread)
+target_link_libraries(melon pthread rt)
 
 add_custom_target(tests ctest)
 

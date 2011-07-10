@@ -12,14 +12,8 @@ static melon_time_t melon_time_default(void * ctx)
   return tp.tv_nsec + tp.tv_sec * 1000 * 1000 * 1000;
 }
 
-int melon_timer_manager_init(void)
+static void check_sleep_timeout()
 {
-  g_melon.time_func = melon_time_default;
-  g_melon.time_ctx = NULL;
-  g_melon.timer_resolution = 100 * 1000; // 100us
-  if (pthread_create(&g_melon.timer_thread, NULL, melon_timer_manager_loop, NULL))
-    return -1;
-  return 0;
 }
 
 static void check_io_timeout()
@@ -40,6 +34,7 @@ static void check_cond_timeout()
 
 static void check_timeouts()
 {
+  check_sleep_timeout();
   check_io_timeout();
   check_mutex_timeout();
   check_rwmutex_timeout();
@@ -48,6 +43,13 @@ static void check_timeouts()
 
 static void destroy_fibers()
 {
+  for (melon_fiber * fiber = g_melon.destroy; fiber;)
+  {
+    melon_fiber * next = fiber->next;
+    melon_fiber_destroy(fiber);
+    fiber = next;
+  }
+  g_melon.destroy = NULL;
 }
 
 void * melon_timer_manager_loop(void * dummy)
@@ -55,16 +57,28 @@ void * melon_timer_manager_loop(void * dummy)
   (void)dummy;
   while (!g_melon.stop)
   {
+    usleep(g_melon.timer_resolution / 1000);
+
     pthread_mutex_lock(&g_melon.mutex);
     check_timeouts();
     destroy_fibers();
     pthread_mutex_unlock(&g_melon.mutex);
-
-    usleep(g_melon.timer_resolution / 1000);
   }
   return NULL;
 }
 
+int melon_timer_manager_init(void)
+{
+  g_melon.time_func = melon_time_default;
+  g_melon.time_ctx = NULL;
+  g_melon.timer_resolution = 100 * 1000; // 100us
+  if (pthread_create(&g_melon.timer_thread, NULL, melon_timer_manager_loop, NULL))
+    return -1;
+  return 0;
+}
+
 void melon_timer_manager_deinit(void)
 {
+  pthread_cancel(g_melon.timer_thread);
+  pthread_join(g_melon.timer_thread, NULL);
 }

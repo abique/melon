@@ -118,6 +118,8 @@ extern "C" {
   void * melon_timer_manager_loop(void *);
   void melon_timer_manager_deinit(void);
 
+  void melon_fiber_destroy(melon_fiber * fiber);
+
   extern __thread melon_fiber * g_current_fiber;
   extern __thread ucontext_t    g_root_ctx;
 

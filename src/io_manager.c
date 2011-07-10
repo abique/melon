@@ -18,11 +18,11 @@ static void melon_io_manager_handle(struct epoll_event * event)
   while (fiber)
   {
     if ((event->events & (EPOLLRDHUP | EPOLLERR | EPOLLHUP)) ||
-        (fiber->waited_event == kIoRead && (event->events & (EPOLLIN | EPOLLPRI))) ||
-        (fiber->waited_event == kIoWrite && (event->events & (EPOLLOUT))))
+        (fiber->waited_event == kEventIoRead && (event->events & (EPOLLIN | EPOLLPRI))) ||
+        (fiber->waited_event == kEventIoWrite && (event->events & (EPOLLOUT))))
     {
       tmp_fiber           = fiber;
-      fiber->waited_event = kNone;
+      fiber->waited_event = kEventNone;
       fiber               = fiber->next;
       melon_list_push(g_melon.ready, tmp_fiber);
     }
@@ -50,15 +50,15 @@ void * melon_io_manager_loop(void * dummy)
     {
       if (g_melon.stop)
         return NULL;
-      melon_yield();
+      usleep(50);
       continue;
     }
 
-    int ret = pthread_mutex_lock(&g_melon.io_blocked_mutex);
+    int ret = pthread_mutex_lock(&g_melon.mutex);
     assert(!ret);
-    for (i = 0; i < count; ++i)
+    for (int i = 0; i < count; ++i)
       melon_io_manager_handle(events + i);
-    ret = pthread_mutex_unlock(&g_melon.io_blocked_mutex);
+    ret = pthread_mutex_unlock(&g_melon.mutex);
     assert(!ret);
   }
   return 0;

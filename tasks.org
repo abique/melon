@@ -1,6 +1,7 @@
 * Runtime
 ** TODO global init/deinit
-** TODO fiber_start/fiber_detach/fiber_join
+** DONE fiber_start/fiber_detach/fiber_join
+   CLOSED: [2011-07-10 Sun 12:34]
 ** TODO mutex_lock/mutex_unlock
 ** TODO cond_wait/cond_notify*
 ** TODO timer manager
@@ -30,7 +31,8 @@
 ** TODO sendfile/splice/tee/vmsplice
 
 * Test suite
-** TODO find the test framework
+** DONE find the test framework
+   CLOSED: [2011-07-10 Sun 12:34]
 ** TODO test fiber_start/fiber_detach/fiber_join
 ** TODO test mutex_lock/mutex_unlock
 ** TODO test cond_wait/cond_notify*

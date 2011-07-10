@@ -19,6 +19,8 @@ extern "C" {
   /** initializes melon runtime
    * @return 0 on success, non zero else */
   int melon_init(uint16_t nb_threads);
+  /** blocks until there is no more fibers left in melon */
+  void melon_wait();
   void melon_deinit();
 
   struct melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
@@ -102,7 +104,7 @@ extern "C" {
   ssize_t melon_recvmsg(int socket, struct msghdr *message, int flags, uint64_t timeout);
   ssize_t melon_sendmsg(int socket, const struct msghdr *message, int flags);
 
-#if 0
+# if 0
   ssize_t melon_sendfile(int out_fd, int in_fd, off_t *offset, size_t count, uint64_t timeout);
 
 #  ifdef _GNU_SOURCE

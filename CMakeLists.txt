@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(melon C)
 
+enable_testing()
+
 add_definitions(-D_GNU_SOURCE -std=c99 -Wall -Wextra)
 
 add_library(melon
@@ -9,17 +11,22 @@ add_library(melon
   src/sched.c
   src/fiber.c
   src/io_manager.c
+  src/timer_manager.c
 )
 target_link_libraries(melon pthread)
 
-add_custom_target(tests)
+add_custom_target(tests ctest)
 
-macro(test NAME SOURCES)
+macro(test_exec NAME SOURCES)
   add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
   target_link_libraries(${NAME} melon)
-  add_test(test-${NAME} ${NAME})
-  add_dependencies(tests test-${NAME})
-endmacro(test)
+  add_dependencies(tests ${NAME})
+endmacro(test_exec)
 
-test(init-0 tests/init-0.c)
-test(init-42 tests/init-42.c)
+test_exec(init-n tests/init-n.c)
+add_test(init-0 init-n 0)
+add_test(init-1 init-n 1)
+add_test(init-42 init-n 42)
+
+test_exec(init-reinit tests/init-reinit.c)
+add_test(init-reinit init-reinit)

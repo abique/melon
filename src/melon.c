@@ -14,10 +14,17 @@ int melon_init(uint16_t nb_threads)
 
   /* default values */
   g_melon.stop = 0;
+  g_melon.fibers_count = 0;
 
-  /* init the spin mutex */
-  if (!pthread_mutex_init(&g_melon.mutex, NULL))
+  /* init the mutex */
+  if (pthread_mutex_init(&g_melon.mutex, NULL))
     return -1;
+
+  if (pthread_cond_init(&g_melon.ready_cond, NULL))
+    goto failure_cond;
+
+  if (pthread_cond_init(&g_melon.fibers_count_zero, NULL))
+    goto failure_cond2;
 
   /* get the number of threads in the thread pull */
   if (nb_threads == 0)
@@ -35,21 +42,22 @@ int melon_init(uint16_t nb_threads)
 
   /* allocate io_blocked */
   g_melon.io_blocked = calloc(1, sizeof (*g_melon.io_blocked) * rlimit_nofile);
+  if (!g_melon.io_blocked)
+    goto failure_calloc;
 
   /* initialize io manager */
   if (melon_io_manager_init())
-    goto failure_calloc;
+    goto failure_io_manager;
 
   /* initialize timer manager */
   if (melon_timer_manager_init())
-    goto failure_io_manager;
+      goto failure_timer_manager;
 
   /* allocates thread pool */
   g_melon.threads = malloc(sizeof (*g_melon.threads) * g_melon.threads_nb);
   for (i = 0; i < g_melon.threads_nb; ++i)
     if (pthread_create(g_melon.threads + i, 0, melon_sched_run, 0))
       goto failure_pthread;
-
   /* succeed */
   return 0;
 
@@ -61,19 +69,35 @@ int melon_init(uint16_t nb_threads)
   free(g_melon.threads);
   g_melon.threads = NULL;
 
-  failure_io_manager:
+  failure_timer_manager:
   /* deinit io manager */
   melon_io_manager_deinit();
 
-  failure_calloc:
+  failure_io_manager:
   /* free io_blocked */
   free(g_melon.io_blocked);
   g_melon.io_blocked = NULL;
+
+  failure_calloc:
+  pthread_cond_destroy(&g_melon.fibers_count_zero);
+
+  failure_cond2:
+  pthread_cond_destroy(&g_melon.ready_cond);
+
+  failure_cond:
+  pthread_mutex_destroy(&g_melon.mutex);
   return -1;
 }
 
 void melon_deinit()
 {
+  // TODO check the number of fibers and warn if > 0
+
+  pthread_mutex_lock(&g_melon.mutex);
+  g_melon.stop = 1;
+  pthread_cond_broadcast(&g_melon.ready_cond);
+  pthread_mutex_unlock(&g_melon.mutex);
+
   /* io_manager */
   melon_io_manager_deinit();
 
@@ -89,4 +113,17 @@ void melon_deinit()
   /* io_blocked */
   free(g_melon.io_blocked);
   g_melon.io_blocked = NULL;
+}
+
+void melon_wait()
+{
+  pthread_mutex_lock(&g_melon.mutex);
+  while (1)
+  {
+    assert(g_melon.fibers_count >= 0);
+    if (g_melon.fibers_count == 0)
+      break;
+    pthread_cond_wait(&g_melon.fibers_count_zero, &g_melon.mutex);
+  }
+  pthread_mutex_unlock(&g_melon.mutex);
 }

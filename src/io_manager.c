@@ -1,5 +1,7 @@
 #include <sys/epoll.h>
 #include <assert.h>
+#include <stdio.h>
+#include <signal.h>
 
 #include "private.h"
 
@@ -61,6 +63,7 @@ void * melon_io_manager_loop(void * dummy)
     ret = pthread_mutex_unlock(&g_melon.mutex);
     assert(!ret);
   }
+  puts("io manager initialized");
   return 0;
 }
 
@@ -68,5 +71,6 @@ void melon_io_manager_deinit(void)
 {
   close(g_melon.epoll_fd);
   g_melon.epoll_fd = -1;
+  pthread_cancel(g_melon.epoll_thread);
   pthread_join(g_melon.epoll_thread, NULL);
 }

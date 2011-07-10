@@ -91,6 +91,10 @@ extern "C" {
 
     /* stop the runtime */
     int stop;
+
+    /* the number of fibers */
+    int            fibers_count;
+    pthread_cond_t fibers_count_zero;
   } melon;
 
   extern melon g_melon;

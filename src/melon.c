@@ -111,6 +111,10 @@ void melon_deinit()
   free(g_melon.threads);
   g_melon.threads = NULL;
 
+  pthread_cond_destroy(&g_melon.fibers_count_zero);
+  pthread_cond_destroy(&g_melon.ready_cond);
+  pthread_mutex_destroy(&g_melon.mutex);
+
   /* io_blocked */
   free(g_melon.io_blocked);
   g_melon.io_blocked = NULL;

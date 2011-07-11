@@ -31,15 +31,14 @@ struct callback
   void * ctx;
 };
 
-static void melon_fiber_wrapper(struct callback * cb)
+static void melon_fiber_wrapper(struct callback cb)
 {
+  assert(g_current_fiber);
   assert(!g_current_fiber->ctx.uc_link);
-  cb->fct(cb->ctx);
-  free(cb);
+  cb.fct(cb.ctx);
 
   /* now join or destroy */
   melon_fiber * self = melon_fiber_self();
-  printf("selft: %p\n", self);
   pthread_mutex_lock(&g_melon.mutex);
   if (self->is_detached)
   {
@@ -62,6 +61,8 @@ static void melon_fiber_wrapper(struct callback * cb)
   if (--g_melon.fibers_count == 0)
     pthread_cond_broadcast(&g_melon.fibers_count_zero);
   pthread_mutex_unlock(&g_melon.mutex);
+  melon_sched_next();
+  assert(0 && "should never be reached");
 }
 
 melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
@@ -84,9 +85,9 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   assert(!ret);
   fiber->ctx.uc_link = NULL;
   fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
-  fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
+  fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE * 2, PROT_READ | PROT_WRITE,
                                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED | MAP_GROWSDOWN | MAP_STACK,
-                                   0, 0);
+                                   0, 0) + PAGE_SIZE;
   if (!fiber->ctx.uc_stack.ss_sp)
   {
     free(fiber);
@@ -94,15 +95,9 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   }
 
   /* initialize the context */
-  struct callback * cb = malloc(sizeof (*cb));
-  if (!cb)
-  {
-    munmap(fiber->ctx.uc_stack.ss_sp, PAGE_SIZE);
-    free(fiber);
-    return NULL;
-  }
-  cb->fct = fct;
-  cb->ctx = ctx;
+  struct callback cb;
+  cb.fct = fct;
+  cb.ctx = ctx;
   makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper,
               sizeof (cb) / sizeof (int), cb);
 

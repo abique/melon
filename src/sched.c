@@ -5,19 +5,9 @@
 __thread melon_fiber * g_current_fiber = NULL;
 __thread ucontext_t    g_root_ctx;
 
-void * melon_sched_run(void * dummy)
+static void sched_next()
 {
-  (void)dummy;
-
   assert(!g_current_fiber);
-  while (!g_melon.stop)
-    melon_sched_next();
-  return NULL;
-}
-
-void melon_sched_next(void)
-{
-  melon_fiber * old_fiber = g_current_fiber;
   pthread_mutex_lock(&g_melon.mutex);
   while (!g_current_fiber)
   {
@@ -37,5 +27,20 @@ void melon_sched_next(void)
   pthread_mutex_unlock(&g_melon.mutex);
 
   swapcontext(&g_root_ctx, &g_current_fiber->ctx);
-  g_current_fiber = old_fiber;
+}
+
+void * melon_sched_run(void * dummy)
+{
+  (void)dummy;
+
+  while (!g_melon.stop)
+    sched_next();
+  return NULL;
+}
+
+void melon_sched_next(void)
+{
+  melon_fiber * fiber = g_current_fiber;
+  g_current_fiber = NULL;
+  swapcontext(&fiber->ctx, &g_root_ctx);
 }

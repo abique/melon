@@ -43,13 +43,14 @@ static void check_timeouts()
 
 static void destroy_fibers()
 {
-  for (melon_fiber * fiber = g_melon.destroy; fiber;)
+  while (1)
   {
-    melon_fiber * next = fiber->next;
+    melon_fiber * fiber = NULL;
+    melon_list_pop(g_melon.destroy, fiber);
+    if (!fiber)
+      break;
     melon_fiber_destroy(fiber);
-    fiber = next;
   }
-  g_melon.destroy = NULL;
 }
 
 void * melon_timer_manager_loop(void * dummy)

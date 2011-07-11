@@ -8,9 +8,6 @@
 static void dummy_fiber(void * dummy)
 {
   (void)dummy;
-  /* char buffer[1024]; */
-  /* sprintf(buffer, "dummy: %ld\n", dummy - NULL); */
-  /* write(STDOUT_FILENO, buffer, strlen(buffer)); */
 }
 
 int main(int argc, char ** argv)

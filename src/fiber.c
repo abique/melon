@@ -25,12 +25,21 @@ void melon_fiber_destroy(melon_fiber * fiber)
   free(fiber);
 }
 
-static void melon_fiber_wrapper(void (*fct)(void *), void * ctx)
+struct callback
 {
-  fct(ctx);
+  void (*fct)(void *);
+  void * ctx;
+};
+
+static void melon_fiber_wrapper(struct callback * cb)
+{
+  assert(!g_current_fiber->ctx.uc_link);
+  cb->fct(cb->ctx);
+  free(cb);
 
   /* now join or destroy */
   melon_fiber * self = melon_fiber_self();
+  printf("selft: %p\n", self);
   pthread_mutex_lock(&g_melon.mutex);
   if (self->is_detached)
   {
@@ -71,6 +80,8 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   fiber->waited_event = kEventNone;
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
+  int ret = getcontext(&fiber->ctx);
+  assert(!ret);
   fiber->ctx.uc_link = NULL;
   fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
   fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
@@ -83,11 +94,22 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   }
 
   /* initialize the context */
-  makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper, 2, fct, ctx);
+  struct callback * cb = malloc(sizeof (*cb));
+  if (!cb)
+  {
+    munmap(fiber->ctx.uc_stack.ss_sp, PAGE_SIZE);
+    free(fiber);
+    return NULL;
+  }
+  cb->fct = fct;
+  cb->ctx = ctx;
+  makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper,
+              sizeof (cb) / sizeof (int), cb);
 
   pthread_mutex_lock(&g_melon.mutex);
   ++g_melon.fibers_count;
   melon_list_push(g_melon.ready, fiber);
+  pthread_cond_signal(&g_melon.ready_cond);
   pthread_mutex_unlock(&g_melon.mutex);
   return fiber;
 }

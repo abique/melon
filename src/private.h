@@ -141,14 +141,17 @@ extern "C" {
 
 # define melon_list_pop(List, Item)             \
   do {                                          \
+    /* empty list */                            \
     if (!(List))                                \
       (Item) = NULL;                            \
+    /* just 1 element */                        \
     else if ((List) == (List)->next)            \
     {                                           \
       (Item) = (List);                          \
       (Item)->next = NULL;                      \
       (List) = NULL;                            \
     }                                           \
+    /* many elements */                         \
     else                                        \
     {                                           \
       (Item) = (List)->next;                    \

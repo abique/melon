@@ -92,6 +92,7 @@ int melon_init(uint16_t nb_threads)
 void melon_deinit()
 {
   // TODO check the number of fibers and warn if > 0
+  assert(g_melon.fibers_count == 0);
 
   pthread_mutex_lock(&g_melon.mutex);
   g_melon.stop = 1;

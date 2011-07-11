@@ -30,3 +30,11 @@ add_test(init-42 init-n 42)
 
 test_exec(init-reinit tests/init-reinit.c)
 add_test(init-reinit init-reinit)
+
+test_exec(create-n-fibers tests/create-n-fibers.c)
+add_test(create-0-fibers create-n-fibers 0)
+add_test(create-10-fibers create-n-fibers 10)
+add_test(create-100-fibers create-n-fibers 100)
+
+test_exec(list tests/list.c)
+add_test(list list)

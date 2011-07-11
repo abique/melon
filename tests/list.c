@@ -29,6 +29,14 @@ int main()
   for (int i = 0; i < NB; ++i)
     items[i] = item_new(i);
 
+  /* check that we can pop a mal-formed list */
+  list = items[0];
+  list->next = NULL;
+  melon_list_pop(list, tmp);
+  assert(list == NULL);
+  assert(tmp == items[0]);
+  assert(tmp->next == NULL);
+
   /* check the empty case */
   melon_list_push(list, items[0]);
   assert(list == items[0]);

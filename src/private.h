@@ -58,19 +58,21 @@ extern "C" {
     MelonEvent           waited_event;
     int                  is_detached;
     struct melon_fiber * terminate_waiter;
+    const char *         name;
   } melon_fiber;
 
   typedef struct melon
   {
     /* the big melon lock */
-    pthread_mutex_t mutex;
+    pthread_mutex_t lock;
 
     /* ready queue */
     melon_fiber *  ready;
     pthread_cond_t ready_cond;
 
     /* queue of fibers to be destroyed */
-    melon_fiber * destroy;
+    melon_fiber *      destroy;
+    pthread_spinlock_t destroy_lock; // used for join as well
 
     /* vector of linked list of fiber waiting for io events
      * n producers, 1 consumer */
@@ -107,6 +109,10 @@ extern "C" {
    * The old fiber will not be put in the ready queue like yield would do,
    * so think to a mechanism to wake up the old fiber. */
   void melon_sched_next(void);
+  /** lock g_melon.lock and pushes the fiber list in the ready queue */
+  void melon_sched_ready(melon_fiber * list);
+  /** call this one if you have locked g_melon.lock */
+  void melon_sched_ready_locked(melon_fiber * list);
 
   /** @return 0 on succees */
   int melon_io_manager_init(void);
@@ -145,7 +151,8 @@ extern "C" {
     if (!(List))                                \
       (Item) = NULL;                            \
     /* just 1 element */                        \
-    else if ((List) == (List)->next)            \
+    else if ((List) == (List)->next ||          \
+             (List)->next == NULL)              \
     {                                           \
       (Item) = (List);                          \
       (Item)->next = NULL;                      \

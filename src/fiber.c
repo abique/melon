@@ -39,12 +39,13 @@ static void melon_fiber_wrapper(struct callback cb)
 
   /* now join or destroy */
   melon_fiber * self = melon_fiber_self();
-  pthread_mutex_lock(&g_melon.mutex);
+  pthread_spin_lock(&g_melon.destroy_lock);
   if (self->is_detached)
   {
     /* push in the destroy queue */
     self->waited_event = kEventDestroy;
     melon_list_push(g_melon.destroy, self);
+    pthread_spin_unlock(&g_melon.destroy_lock);
   }
   else
   {
@@ -53,14 +54,16 @@ static void melon_fiber_wrapper(struct callback cb)
     {
       /* a fiber is waiting for us, let's activate it ! */
       self->terminate_waiter->waited_event = kEventNone;
-      melon_list_push(g_melon.ready, self->terminate_waiter);
+      pthread_spin_unlock(&g_melon.destroy_lock);
+      melon_sched_ready(self->terminate_waiter);
     }
+    else
+      pthread_spin_unlock(&g_melon.destroy_lock);
   }
 
   /* decrement the fibers count and if 0, then broadcast the cond */
-  if (--g_melon.fibers_count == 0)
+  if (__sync_add_and_fetch(&g_melon.fibers_count, -1) == 0)
     pthread_cond_broadcast(&g_melon.fibers_count_zero);
-  pthread_mutex_unlock(&g_melon.mutex);
   melon_sched_next();
   assert(0 && "should never be reached");
 }
@@ -75,19 +78,24 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   assert(fct);
 
   /* allocate a fiber structre */
-  melon_fiber * fiber = calloc(1, sizeof (melon_fiber));
+  melon_fiber * fiber = malloc(sizeof (melon_fiber));
   if (!fiber)
     return NULL;
-  fiber->waited_event = kEventNone;
+  fiber->waited_event     = kEventNone;
+  fiber->terminate_waiter = NULL;
+  fiber->is_detached      = 0;
+  fiber->name             = "(none)";
+  fiber->timeout          = 0;
+  fiber->next             = NULL;
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
   int ret = getcontext(&fiber->ctx);
   assert(!ret);
   fiber->ctx.uc_link = NULL;
   fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
-  fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE * 2, PROT_READ | PROT_WRITE,
+  fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
                                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED | MAP_GROWSDOWN | MAP_STACK,
-                                   0, 0) + PAGE_SIZE;
+                                   0, 0);
   if (!fiber->ctx.uc_stack.ss_sp)
   {
     free(fiber);
@@ -101,21 +109,18 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper,
               sizeof (cb) / sizeof (int), cb);
 
-  pthread_mutex_lock(&g_melon.mutex);
-  ++g_melon.fibers_count;
-  melon_list_push(g_melon.ready, fiber);
-  pthread_cond_signal(&g_melon.ready_cond);
-  pthread_mutex_unlock(&g_melon.mutex);
+  __sync_fetch_and_add(&g_melon.fibers_count, 1);
+  melon_sched_ready(fiber);
   return fiber;
 }
 
 void melon_fiber_join(melon_fiber * fiber)
 {
   assert(fiber);
-  pthread_mutex_lock(&g_melon.mutex);
+  pthread_mutex_lock(&g_melon.lock);
   if (fiber->waited_event == kEventJoin)
   {
-    pthread_mutex_unlock(&g_melon.mutex);
+    pthread_mutex_unlock(&g_melon.lock);
     melon_fiber_destroy(fiber);
   }
   else
@@ -148,24 +153,24 @@ void melon_fiber_join(melon_fiber * fiber)
 int melon_fiber_tryjoin(melon_fiber * fiber)
 {
   assert(fiber);
-  pthread_mutex_lock(&g_melon.mutex);
+  pthread_mutex_lock(&g_melon.lock);
   if (fiber->waited_event == kEventJoin)
   {
-    pthread_mutex_unlock(&g_melon.mutex);
+    pthread_mutex_unlock(&g_melon.lock);
     melon_fiber_destroy(fiber);
     return 1;
   }
-  pthread_mutex_unlock(&g_melon.mutex);
+  pthread_mutex_unlock(&g_melon.lock);
   return 0;
 }
 
 void melon_fiber_detach(melon_fiber * fiber)
 {
   assert(fiber);
-  pthread_mutex_lock(&g_melon.mutex);
+  pthread_mutex_lock(&g_melon.lock);
   if (fiber->waited_event == kEventJoin)
     melon_fiber_destroy(fiber);
   else
     fiber->is_detached = 1;
-  pthread_mutex_unlock(&g_melon.mutex);
+  pthread_mutex_unlock(&g_melon.lock);
 }

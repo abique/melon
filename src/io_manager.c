@@ -56,11 +56,11 @@ void * melon_io_manager_loop(void * dummy)
       continue;
     }
 
-    int ret = pthread_mutex_lock(&g_melon.mutex);
+    int ret = pthread_mutex_lock(&g_melon.lock);
     assert(!ret);
     for (int i = 0; i < count; ++i)
       melon_io_manager_handle(events + i);
-    ret = pthread_mutex_unlock(&g_melon.mutex);
+    ret = pthread_mutex_unlock(&g_melon.lock);
     assert(!ret);
   }
   puts("io manager initialized");

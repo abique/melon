@@ -4,28 +4,13 @@
 
 __thread melon_fiber * g_current_fiber = NULL;
 __thread ucontext_t    g_root_ctx;
-
-static void destroy_fibers()
-{
-  pthread_spin_lock(&g_melon.destroy_lock);
-  melon_fiber * list = g_melon.destroy;
-  g_melon.destroy = NULL;
-  pthread_spin_unlock(&g_melon.destroy_lock);
-  if (list)
-    while (1)
-    {
-      melon_fiber * fiber = NULL;
-      melon_list_pop(list, fiber);
-      if (!fiber)
-        break;
-      melon_fiber_destroy(fiber);
-    }
-}
+static __thread int    g_destroy_current_fiber = 0;
 
 static void sched_next()
 {
   assert(!g_current_fiber);
-  pthread_mutex_lock(&g_melon.lock);
+  int ret = pthread_mutex_lock(&g_melon.lock);
+  assert(!ret);
   while (!g_current_fiber)
   {
     if (g_melon.stop)
@@ -37,13 +22,15 @@ static void sched_next()
     melon_list_pop(g_melon.ready, g_current_fiber);
     if (!g_current_fiber)
     {
-      pthread_cond_wait(&g_melon.ready_cond, &g_melon.lock);
+      int ret = pthread_cond_wait(&g_melon.ready_cond, &g_melon.lock);
+      assert(!ret);
       continue;
     }
   }
   pthread_mutex_unlock(&g_melon.lock);
 
-  swapcontext(&g_root_ctx, &g_current_fiber->ctx);
+  ret = swapcontext(&g_root_ctx, &g_current_fiber->ctx);
+  assert(!ret);
 }
 
 void * melon_sched_run(void * dummy)
@@ -52,18 +39,29 @@ void * melon_sched_run(void * dummy)
 
   while (!g_melon.stop)
   {
-    destroy_fibers();
+    if (g_destroy_current_fiber)
+    {
+      melon_fiber_destroy(g_current_fiber);
+      g_current_fiber = NULL;
+      g_destroy_current_fiber = 0;
+    }
     sched_next();
   }
-  destroy_fibers();
   return NULL;
 }
 
-void melon_sched_next(void)
+void melon_sched_next(int destroy_current_fiber)
 {
   melon_fiber * fiber = g_current_fiber;
-  g_current_fiber = NULL;
-  swapcontext(&fiber->ctx, &g_root_ctx);
+  if (destroy_current_fiber)
+    g_destroy_current_fiber = 1;
+  else
+  {
+    g_current_fiber = NULL;
+    g_destroy_current_fiber = 0;
+  }
+  int ret = swapcontext(&fiber->ctx, &g_root_ctx);
+  assert(!ret);
 }
 
 void melon_sched_ready_locked(melon_fiber * list)

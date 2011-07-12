@@ -16,7 +16,6 @@ int melon_init(uint16_t nb_threads)
   g_melon.stop = 0;
   g_melon.fibers_count = 0;
   g_melon.ready = NULL;
-  g_melon.destroy = NULL;
 
   /* init the mutex */
   if (pthread_mutex_init(&g_melon.lock, NULL))
@@ -27,9 +26,6 @@ int melon_init(uint16_t nb_threads)
 
   if (pthread_cond_init(&g_melon.fibers_count_zero, NULL))
     goto failure_cond2;
-
-  if (pthread_spin_init(&g_melon.destroy_lock, PTHREAD_PROCESS_SHARED))
-    goto failure_spin;
 
   /* get the number of threads in the thread pull */
   if (nb_threads == 0)
@@ -81,9 +77,6 @@ int melon_init(uint16_t nb_threads)
   g_melon.io_blocked = NULL;
 
   failure_calloc:
-  pthread_spin_destroy(&g_melon.destroy_lock);
-
-  failure_spin:
   pthread_cond_destroy(&g_melon.fibers_count_zero);
 
   failure_cond2:
@@ -116,7 +109,6 @@ void melon_deinit()
   free(g_melon.threads);
   g_melon.threads = NULL;
 
-  pthread_spin_destroy(&g_melon.destroy_lock);
   pthread_cond_destroy(&g_melon.fibers_count_zero);
   pthread_cond_destroy(&g_melon.ready_cond);
   pthread_mutex_destroy(&g_melon.lock);

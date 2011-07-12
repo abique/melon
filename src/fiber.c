@@ -22,49 +22,48 @@ melon_fiber * melon_fiber_self(void)
 void melon_fiber_destroy(melon_fiber * fiber)
 {
   munmap(fiber->ctx.uc_stack.ss_sp, fiber->ctx.uc_stack.ss_size);
+  pthread_spin_destroy(&fiber->lock);
   free(fiber);
 }
 
-struct callback
+static void melon_fiber_wrapper(void)
 {
-  void (*fct)(void *);
-  void * ctx;
-};
+  melon_fiber * self = melon_fiber_self();
+  int destroy = 0;
+  assert(self);
+  assert(!self->ctx.uc_link);
+  assert(self->callback);
 
-static void melon_fiber_wrapper(struct callback cb)
-{
-  assert(g_current_fiber);
-  assert(!g_current_fiber->ctx.uc_link);
-  cb.fct(cb.ctx);
+  self->callback(self->callback_ctx);
 
   /* now join or destroy */
-  melon_fiber * self = melon_fiber_self();
-  pthread_spin_lock(&g_melon.destroy_lock);
+  pthread_spin_lock(&self->lock);
   if (self->is_detached)
   {
     /* push in the destroy queue */
     self->waited_event = kEventDestroy;
-    melon_list_push(g_melon.destroy, self);
-    pthread_spin_unlock(&g_melon.destroy_lock);
+    destroy = 1;
+    pthread_spin_unlock(&self->lock);
   }
   else
   {
     self->waited_event = kEventJoin;
     if (self->terminate_waiter)
     {
+      pthread_spin_unlock(&self->lock);
       /* a fiber is waiting for us, let's activate it ! */
       self->terminate_waiter->waited_event = kEventNone;
-      pthread_spin_unlock(&g_melon.destroy_lock);
       melon_sched_ready(self->terminate_waiter);
+      destroy = 1;
     }
     else
-      pthread_spin_unlock(&g_melon.destroy_lock);
+      pthread_spin_unlock(&self->lock);
   }
 
   /* decrement the fibers count and if 0, then broadcast the cond */
   if (__sync_add_and_fetch(&g_melon.fibers_count, -1) == 0)
     pthread_cond_broadcast(&g_melon.fibers_count_zero);
-  melon_sched_next();
+  melon_sched_next(destroy);
   assert(0 && "should never be reached");
 }
 
@@ -81,19 +80,27 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   melon_fiber * fiber = malloc(sizeof (melon_fiber));
   if (!fiber)
     return NULL;
-  fiber->waited_event     = kEventNone;
-  fiber->terminate_waiter = NULL;
-  fiber->is_detached      = 0;
-  fiber->name             = "(none)";
-  fiber->timeout          = 0;
   fiber->next             = NULL;
+  fiber->timeout          = 0;
+  //memset(&fiber->ctx, 0, sizeof (fiber->ctx));
+  fiber->waited_event     = kEventNone;
+  fiber->is_detached      = 0;
+  fiber->terminate_waiter = NULL;
+  fiber->name             = "(none)";
+  fiber->callback         = fct;
+  fiber->callback_ctx     = ctx;
+  if (pthread_spin_init(&fiber->lock, PTHREAD_PROCESS_SHARED))
+  {
+    free(fiber);
+    return NULL;
+  }
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
   int ret = getcontext(&fiber->ctx);
   assert(!ret);
   fiber->ctx.uc_link = NULL;
   fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
-  fiber->ctx.uc_stack.ss_sp = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
+  fiber->ctx.uc_stack.ss_sp = mmap(0, fiber->ctx.uc_stack.ss_size, PROT_READ | PROT_WRITE | PROT_EXEC,
                                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED | MAP_GROWSDOWN | MAP_STACK,
                                    0, 0);
   if (!fiber->ctx.uc_stack.ss_sp)
@@ -101,14 +108,7 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
     free(fiber);
     return NULL;
   }
-
-  /* initialize the context */
-  struct callback cb;
-  cb.fct = fct;
-  cb.ctx = ctx;
-  makecontext(&fiber->ctx, (void (*)(void))melon_fiber_wrapper,
-              sizeof (cb) / sizeof (int), cb);
-
+  makecontext(&fiber->ctx, melon_fiber_wrapper, 0);
   __sync_fetch_and_add(&g_melon.fibers_count, 1);
   melon_sched_ready(fiber);
   return fiber;
@@ -143,7 +143,7 @@ void melon_fiber_join(melon_fiber * fiber)
     melon_fiber * self = melon_fiber_self();
     fiber->terminate_waiter = self;
     /* now let's wait for the fiber to finish */
-    melon_sched_next();
+    melon_sched_next(0);
     /* here the fiber has been waked up so the fiber is finished !
      * We have the responsability to free the fiber. */
     melon_fiber_destroy(fiber);

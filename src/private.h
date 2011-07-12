@@ -59,6 +59,9 @@ extern "C" {
     int                  is_detached;
     struct melon_fiber * terminate_waiter;
     const char *         name;
+    void                 (*callback)(void * ctx);
+    void *               callback_ctx;
+    pthread_spinlock_t   lock; // used for join
   } melon_fiber;
 
   typedef struct melon
@@ -69,10 +72,6 @@ extern "C" {
     /* ready queue */
     melon_fiber *  ready;
     pthread_cond_t ready_cond;
-
-    /* queue of fibers to be destroyed */
-    melon_fiber *      destroy;
-    pthread_spinlock_t destroy_lock; // used for join as well
 
     /* vector of linked list of fiber waiting for io events
      * n producers, 1 consumer */
@@ -107,8 +106,9 @@ extern "C" {
   void * melon_sched_run(void *);
   /** Schedule the next fiber and stops the current (if there is one).
    * The old fiber will not be put in the ready queue like yield would do,
-   * so think to a mechanism to wake up the old fiber. */
-  void melon_sched_next(void);
+   * so think to a mechanism to wake up the old fiber.
+   * @param destroy_current_fiber will destroy the current fiber */
+  void melon_sched_next(int destroy_current_fiber);
   /** lock g_melon.lock and pushes the fiber list in the ready queue */
   void melon_sched_ready(melon_fiber * list);
   /** call this one if you have locked g_melon.lock */

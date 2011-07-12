@@ -12,6 +12,7 @@ add_library(melon
   src/fiber.c
   src/io_manager.c
   src/timer_manager.c
+  src/stack_alloc.c
 )
 target_link_libraries(melon pthread rt)
 

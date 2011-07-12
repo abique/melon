@@ -6,13 +6,10 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "private.h"
-
-#ifndef MAP_UNINITIALIZED
-# define MAP_UNINITIALIZED 0x0
-#endif
 
 melon_fiber * melon_fiber_self(void)
 {
@@ -21,7 +18,7 @@ melon_fiber * melon_fiber_self(void)
 
 void melon_fiber_destroy(melon_fiber * fiber)
 {
-  munmap(fiber->ctx.uc_stack.ss_sp, fiber->ctx.uc_stack.ss_size);
+  melon_stack_free(fiber->ctx.uc_stack.ss_sp);
   pthread_spin_destroy(&fiber->lock);
   free(fiber);
 }
@@ -69,11 +66,6 @@ static void melon_fiber_wrapper(void)
 
 melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
 {
-  static int PAGE_SIZE = 0;
-
-  if (!PAGE_SIZE)
-    PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
-
   assert(fct);
 
   /* allocate a fiber structre */
@@ -99,10 +91,8 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   int ret = getcontext(&fiber->ctx);
   assert(!ret);
   fiber->ctx.uc_link = NULL;
-  fiber->ctx.uc_stack.ss_size = PAGE_SIZE;
-  fiber->ctx.uc_stack.ss_sp = mmap(0, fiber->ctx.uc_stack.ss_size, PROT_READ | PROT_WRITE | PROT_EXEC,
-                                   MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED | MAP_GROWSDOWN | MAP_STACK,
-                                   0, 0);
+  fiber->ctx.uc_stack.ss_size = melon_stack_size();
+  fiber->ctx.uc_stack.ss_sp = melon_stack_alloc();
   if (!fiber->ctx.uc_stack.ss_sp)
   {
     free(fiber);

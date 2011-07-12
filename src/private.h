@@ -126,6 +126,12 @@ extern "C" {
 
   void melon_fiber_destroy(melon_fiber * fiber);
 
+  int melon_stack_init();
+  void melon_stack_deinit();
+  void * melon_stack_alloc();
+  void melon_stack_free(void * addr);
+  uint32_t melon_stack_size();
+
   extern __thread melon_fiber * g_current_fiber;
   extern __thread ucontext_t    g_root_ctx;
 

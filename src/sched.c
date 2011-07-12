@@ -41,6 +41,7 @@ void * melon_sched_run(void * dummy)
   {
     if (g_destroy_current_fiber)
     {
+      assert(g_current_fiber);
       melon_fiber_destroy(g_current_fiber);
       g_current_fiber = NULL;
       g_destroy_current_fiber = 0;

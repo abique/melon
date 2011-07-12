@@ -27,6 +27,8 @@ int melon_init(uint16_t nb_threads)
   if (pthread_cond_init(&g_melon.fibers_count_zero, NULL))
     goto failure_cond2;
 
+  melon_stack_init();
+
   /* get the number of threads in the thread pull */
   if (nb_threads == 0)
     nb_threads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -108,6 +110,8 @@ void melon_deinit()
     pthread_join(g_melon.threads[i], 0);
   free(g_melon.threads);
   g_melon.threads = NULL;
+
+  melon_stack_deinit();
 
   pthread_cond_destroy(&g_melon.fibers_count_zero);
   pthread_cond_destroy(&g_melon.ready_cond);

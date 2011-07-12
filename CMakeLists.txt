@@ -24,6 +24,12 @@ macro(test_exec NAME SOURCES)
   add_dependencies(tests ${NAME})
 endmacro(test_exec)
 
+test_exec(list tests/list.c)
+add_test(list list)
+
+test_exec(stack_alloc tests/stack_alloc.c)
+add_test(stack_alloc stack_alloc)
+
 test_exec(init-n tests/init-n.c)
 add_test(init-0 init-n 0)
 add_test(init-1 init-n 1)
@@ -37,6 +43,3 @@ add_test(create-0-fibers create-n-fibers 0)
 add_test(create-100-fibers create-n-fibers 100)
 add_test(create-10000-fibers create-n-fibers 10000)
 add_test(create-10000000-fibers create-n-fibers 10000000)
-
-test_exec(list tests/list.c)
-add_test(list list)

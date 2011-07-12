@@ -14,6 +14,9 @@ int nb_created = 0;
 
 int main(int argc, char ** argv)
 {
+  (void)argc;
+  (void)argv;
+
   if (argc != 2)
     return 1;
 

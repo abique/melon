@@ -27,62 +27,53 @@ int melon_stack_init()
 
 void melon_stack_deinit()
 {
-  pthread_spin_destroy(&g_stack_list_lock);
-  list * item = g_stack_list;
-  list * next;
+  list * item;
 
-  while (item)
+  pthread_spin_destroy(&g_stack_list_lock);
+  while (1)
   {
-    next = item->next;
+    melon_list_pop(g_stack_list, item);
+    if (!item)
+      break;
     munmap((void*)item, SIGSTKSZ);
-    item = next;
   }
 }
 
 void * melon_stack_alloc()
 {
-  void * addr;
-  list * item = g_stack_list;
-  if (!item)
-    goto alloc;
-
   pthread_spin_lock(&g_stack_list_lock);
-  item = g_stack_list;
-  if (!item)
+  if (!g_stack_list)
   {
     pthread_spin_unlock(&g_stack_list_lock);
-    alloc:
-    addr = mmap(0, SIGSTKSZ, PROT_READ | PROT_WRITE | PROT_EXEC,
-                MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED |
-                MAP_GROWSDOWN | MAP_STACK, 0, 0);
+    void * addr = mmap(NULL /* addr */, SIGSTKSZ /* size */,
+                       PROT_READ | PROT_WRITE | PROT_EXEC,
+                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED |
+                       MAP_GROWSDOWN | MAP_STACK, 0 /* fd */, 0 /* offset */);
     if (addr == MAP_FAILED)
       return NULL;
     return addr;
   }
 
-  g_stack_list = item->next;
+  list * item;
+  melon_list_pop(g_stack_list, item);
   --g_stack_list_nb;
-  assert(g_stack_list_nb >= 0);
   pthread_spin_unlock(&g_stack_list_lock);
   return (void*)item;
 }
 
 void melon_stack_free(void * addr)
 {
-  if (!addr)
-    return;
+  assert(addr);
 
-  if (g_stack_list_nb > -1)
+  if (g_stack_list_nb > 50)
   {
     munmap(addr, SIGSTKSZ);
     return;
   }
+
   pthread_spin_lock(&g_stack_list_lock);
-  assert(g_stack_list_nb >= 0);
   ++g_stack_list_nb;
-  list * item = (list*)addr;
-  item->next = g_stack_list;
-  g_stack_list = item;
+  melon_list_push(g_stack_list, (list*)addr);
   pthread_spin_unlock(&g_stack_list_lock);
 }
 

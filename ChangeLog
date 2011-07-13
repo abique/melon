@@ -1,5 +1,6 @@
 2011-07-14  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* melonpp.hh: added C++ binding to melon
 	* melon_fiber_start: changed return type from melon_fiber * to int:
 	as the user doesn't join the fiber, he doesn't need the fiber pointer.
 	Just returning int to tell if the creation succeed.

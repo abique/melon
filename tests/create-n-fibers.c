@@ -29,7 +29,6 @@ int main(int argc, char ** argv)
     struct melon_fiber * fiber = melon_fiber_start(dummy_fiber, NULL + nb_created);
     if (!fiber)
       break;
-    melon_fiber_detach(fiber);
   }
 
   printf("waiting\n");

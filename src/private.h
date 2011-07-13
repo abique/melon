@@ -5,6 +5,7 @@
 # include <ucontext.h>
 
 # include "melon.h"
+# include "spinlock.h"
 
 # ifdef __cplusplus
 extern "C" {
@@ -15,8 +16,6 @@ extern "C" {
     kEventNone,
     kEventIoRead,
     kEventIoWrite,
-    kEventJoin, // the fiber terminate and is waiting for another fiber to join it
-    kEventTerminate, // the fiber joined another and is waiting for the other to terminate
     kEventDestroy,
   } MelonEvent;
 
@@ -57,11 +56,9 @@ extern "C" {
     ucontext_t           ctx;
     MelonEvent           waited_event;
     int                  is_detached;
-    struct melon_fiber * terminate_waiter;
     const char *         name;
     void                 (*callback)(void * ctx);
     void *               callback_ctx;
-    pthread_spinlock_t   lock; // used for join
   } melon_fiber;
 
   typedef struct melon
@@ -106,9 +103,8 @@ extern "C" {
   void * melon_sched_run(void *);
   /** Schedule the next fiber and stops the current (if there is one).
    * The old fiber will not be put in the ready queue like yield would do,
-   * so think to a mechanism to wake up the old fiber.
-   * @param destroy_current_fiber will destroy the current fiber */
-  void melon_sched_next(int destroy_current_fiber);
+   * so think to a mechanism to wake up the old fiber. */
+  void melon_sched_next();
   /** lock g_melon.lock and pushes the fiber list in the ready queue */
   void melon_sched_ready(melon_fiber * list);
   /** call this one if you have locked g_melon.lock */
@@ -172,24 +168,6 @@ extern "C" {
       (Item)->next = NULL;                      \
     }                                           \
   } while (0)
-
-  typedef int melon_spinlock;
-
-  static inline void melon_spin_init(melon_spinlock * lock)
-  {
-    *lock = 0;
-  }
-
-  static inline void melon_spin_lock(melon_spinlock * lock)
-  {
-    while (!__sync_bool_compare_and_swap(lock, 0, 1))
-      continue;
-  }
-
-  static inline void melon_spin_unlock(melon_spinlock * lock)
-  {
-    *lock = 0;
-  }
 
 # ifdef __cplusplus
 }

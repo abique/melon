@@ -4,11 +4,10 @@
 
 __thread melon_fiber * g_current_fiber = NULL;
 __thread ucontext_t    g_root_ctx;
-static __thread int    g_destroy_current_fiber = 0;
 
 static void sched_next()
 {
-  assert(!g_current_fiber);
+  g_current_fiber = NULL;
   int ret = pthread_mutex_lock(&g_melon.lock);
   assert(!ret);
   while (!g_current_fiber)
@@ -39,33 +38,20 @@ void * melon_sched_run(void * dummy)
 
   /* init TLS */
   g_current_fiber = NULL;
-  g_destroy_current_fiber = 0;
 
   while (!g_melon.stop)
   {
-    if (g_destroy_current_fiber)
-    {
-      assert(g_current_fiber);
-      melon_fiber_destroy(g_current_fiber);
-      g_current_fiber = NULL;
-      g_destroy_current_fiber = 0;
-    }
     sched_next();
+    if (g_current_fiber && g_current_fiber->waited_event == kEventDestroy)
+      melon_fiber_destroy(g_current_fiber);
   }
   return NULL;
 }
 
-void melon_sched_next(int destroy_current_fiber)
+void melon_sched_next()
 {
-  melon_fiber * fiber = g_current_fiber;
-  if (destroy_current_fiber)
-    g_destroy_current_fiber = 1;
-  else
-  {
-    g_current_fiber = NULL;
-    g_destroy_current_fiber = 0;
-  }
-  int ret = swapcontext(&fiber->ctx, &g_root_ctx);
+  assert(g_current_fiber);
+  int ret = swapcontext(&g_current_fiber->ctx, &g_root_ctx);
   assert(!ret);
 }
 
@@ -79,6 +65,7 @@ void melon_sched_ready_locked(melon_fiber * list)
     melon_list_pop(list, fiber);
     if (!fiber)
       break;
+    fiber->waited_event = kEventNone;
     melon_list_push(g_melon.ready, fiber);
     ++nb;
   }

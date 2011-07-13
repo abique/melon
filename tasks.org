@@ -1,6 +1,7 @@
 * Runtime
-** TODO global init/deinit
-** DONE fiber_start/fiber_detach/fiber_join
+** DONE global init/deinit
+   CLOSED: [2011-07-13 Wed 17:19]
+** DONE fiber_start/fiber_destroy
    CLOSED: [2011-07-10 Sun 12:34]
 ** TODO mutex_lock/mutex_unlock
 ** TODO cond_wait/cond_notify*
@@ -33,6 +34,11 @@
 * Test suite
 ** DONE find the test framework
    CLOSED: [2011-07-10 Sun 12:34]
-** TODO test fiber_start/fiber_detach/fiber_join
+** DONE test fiber_start/fiber_destroy
+   CLOSED: [2011-07-13 Wed 17:19]
+** DONE test the stack allocator
+   CLOSED: [2011-07-13 Wed 17:20]
+** DONE test list implementation
+   CLOSED: [2011-07-13 Wed 17:20]
 ** TODO test mutex_lock/mutex_unlock
 ** TODO test cond_wait/cond_notify*

@@ -1,0 +1,9 @@
+2011-07-13  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* release 0.1.0
+	* melon_fiber_start: stable
+	* melon_sched: stable
+	* melon_list: stable
+	* api: removed melon_join, melon_detach, melon_tryjoin, melon_timedjoin
+	as fibers are detached and simplifies code, and synchronisation.
+	* testsuite: based on ctest, stable

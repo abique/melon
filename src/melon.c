@@ -68,6 +68,7 @@ int melon_init(uint16_t nb_threads)
     pthread_join(g_melon.threads[i - 1], NULL);
   free(g_melon.threads);
   g_melon.threads = NULL;
+  melon_timer_manager_deinit();
 
   failure_timer_manager:
   /* deinit io manager */

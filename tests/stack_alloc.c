@@ -2,7 +2,7 @@
 
 #include "../src/private.h"
 
-# define NB 10000
+# define NB 1000
 
 void * stack_check(void * ctx)
 {

@@ -81,6 +81,7 @@ namespace melon
     inline bool tryLock() { return ::melon_mutex_trylock(mutex_); }
     inline bool timedLock(::melon_time_t time) { return ::melon_mutex_timedlock(mutex_, time); }
   private:
+    friend class Condition;
     ::melon_mutex * mutex_;
   };
 
@@ -126,8 +127,8 @@ namespace melon
   public:
     inline Condition() : cond_(::melon_cond_new()) {}
     inline ~Condition() { ::melon_cond_destroy(cond_); }
-    inline void wait() { ::melon_cond_wait(cond_); }
-    inline void timedWait(::melon_time_t time) { ::melon_cond_wait(cond_, time); }
+    inline void wait(Mutex & mutex) { ::melon_cond_wait(cond_, mutex.mutex_); }
+    inline void timedWait(Mutex & mutex, ::melon_time_t time) { ::melon_cond_wait(cond_, mutex.mutex_, time); }
     inline void wakeOne() { ::melon_cond_signal(cond_); }
     inline void wakeAll() { ::melon_cond_broadcast(cond_); }
   private:
@@ -135,6 +136,61 @@ namespace melon
   };
 
   void sleep(::melon_time_t time);
+
+  template <typename T, typename QueueType = std::queue<T>>
+  class Channel
+  {
+  public:
+    inline Channel()
+      : closed_(false),
+        queue_(),
+        mutex_(),
+        cond_()
+    {
+    }
+
+    inline bool ok() const { return mutex_.ok() && cond_.ok(); }
+    inline bool push(const T & t)
+    {
+      Mutex::Locker locker(mutex_);
+      if (closed_)
+        return false;
+
+      queue_.push_back(t);
+      cond_.wakeOne();
+      return true;
+    }
+
+    inline bool pop(T & t)
+    {
+      Mutex::Locker locker(mutex_);
+      while (true)
+      {
+        if (!queue_.empty())
+        {
+          t = queue_.front();
+          queue_.pop_front();
+          return true;
+        }
+        else if (closed_)
+          return false;
+        else
+          cond_.wait(mutex_);
+      }
+    }
+
+    inline void close()
+    {
+      Mutex::Locker locker(mutex_);
+      closed_ = true;
+      cond_.wakeAll();
+    }
+
+    bool closed_;
+    QueueType queue_;
+    Mutex mutex_;
+    Condition cond_;
+  };
 }
 
 #endif /* !MELON_MELONPP_HH */

@@ -34,17 +34,8 @@ extern "C" {
    * of the ready queue */
   void melon_yield();
 
-  typedef int64_t melon_time_t;
-  typedef melon_time_t (*melon_time_f)(void * ctx);
-  /** sets the callback to get the current time */
-  void melon_time_setfunc(melon_time_f time_fct, void * ctx);
   /** gets the time in nanoseconds */
   melon_time_t melon_time();
-  /** sets the time resolution of timeouts checks
-   * @return the effective time resolution */
-  melon_time_t melon_set_timeresolution(melon_time_t res);
-  /** gets the time resolution of timeouts checks */
-  melon_time_t melon_get_timeresolution();
   /** @} */
 
   /**

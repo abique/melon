@@ -74,7 +74,7 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
     return NULL;
   fiber->next             = NULL;
   fiber->timeout          = 0;
-  //memset(&fiber->ctx, 0, sizeof (fiber->ctx));
+  memset(&fiber->ctx, 0, sizeof (fiber->ctx));
   fiber->waited_event     = kEventNone;
   fiber->is_detached      = 0;
   fiber->terminate_waiter = NULL;

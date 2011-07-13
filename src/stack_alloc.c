@@ -47,8 +47,8 @@ void * melon_stack_alloc()
     melon_spin_unlock(&g_stack_list_lock);
     void * addr = mmap(NULL /* addr */, SIGSTKSZ /* size */,
                        PROT_READ | PROT_WRITE | PROT_EXEC,
-                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED |
-                       MAP_GROWSDOWN | MAP_STACK, 0 /* fd */, 0 /* offset */);
+                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED,
+                       0 /* fd */, 0 /* offset */);
     if (addr == MAP_FAILED)
       return NULL;
     return addr;
@@ -65,7 +65,7 @@ void melon_stack_free(void * addr)
 {
   assert(addr);
 
-  if (g_stack_list_nb > 50)
+  if (g_stack_list_nb > 100)
   {
     munmap(addr, SIGSTKSZ);
     return;
@@ -73,7 +73,8 @@ void melon_stack_free(void * addr)
 
   melon_spin_lock(&g_stack_list_lock);
   ++g_stack_list_nb;
-  melon_list_push(g_stack_list, (list*)addr);
+  list * item = (list*)addr;
+  melon_list_push(g_stack_list, item);
   melon_spin_unlock(&g_stack_list_lock);
 }
 

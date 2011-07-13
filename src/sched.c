@@ -37,6 +37,10 @@ void * melon_sched_run(void * dummy)
 {
   (void)dummy;
 
+  /* init TLS */
+  g_current_fiber = NULL;
+  g_destroy_current_fiber = 0;
+
   while (!g_melon.stop)
   {
     if (g_destroy_current_fiber)

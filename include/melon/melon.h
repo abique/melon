@@ -8,6 +8,8 @@
 # include <sys/sendfile.h>
 # include <fcntl.h>
 
+# include "spinlock.h"
+
 # ifdef __cplusplus
 extern "C" {
 # endif

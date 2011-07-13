@@ -68,8 +68,8 @@ extern "C" {
 
   struct melon_cond * melon_cond_new();
   void melon_cond_destroy(struct melon_cond * condition);
-  void melon_cond_wait(struct melon_cond * condition);
-  void melon_cond_timedwait(struct melon_cond * condition, uint64_t timeout);
+  void melon_cond_wait(struct melon_cond * condition, struct melon_mutex * mutex);
+  void melon_cond_timedwait(struct melon_cond * condition, struct melon_mutex * mutex, uint64_t timeout);
   void melon_cond_signal(struct melon_cond * condition);
   void melon_cond_broadcast(struct melon_cond * condition);
   /** @} */

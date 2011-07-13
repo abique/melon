@@ -40,14 +40,14 @@ static void melon_fiber_wrapper(void)
   assert(0 && "should never be reached");
 }
 
-melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
+int melon_fiber_start(void (*fct)(void *), void * ctx)
 {
   assert(fct);
 
   /* allocate a fiber structre */
   melon_fiber * fiber = malloc(sizeof (melon_fiber));
   if (!fiber)
-    return NULL;
+    return -1;
   fiber->next             = NULL;
   fiber->timeout          = 0;
   memset(&fiber->ctx, 0, sizeof (fiber->ctx));
@@ -66,10 +66,10 @@ melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx)
   if (!fiber->ctx.uc_stack.ss_sp)
   {
     free(fiber);
-    return NULL;
+    return -1;
   }
   makecontext(&fiber->ctx, melon_fiber_wrapper, 0);
   __sync_fetch_and_add(&g_melon.fibers_count, 1);
   melon_sched_ready(fiber);
-  return fiber;
+  return 0;
 }

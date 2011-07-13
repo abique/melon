@@ -23,7 +23,9 @@ extern "C" {
   void melon_wait();
   void melon_deinit();
 
-  struct melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
+  /** creates a new fiber
+   * @return 0 on success */
+  int melon_fiber_start(void (*fct)(void *), void * ctx);
   struct melon_fiber * melon_fiber_self(void);
 
   /** schedules next fibers and put the current one in the back

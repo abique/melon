@@ -34,6 +34,5 @@ int main(int argc, char ** argv)
   melon_wait();
   printf("wait finished\n");
   melon_deinit();
-  fflush(0);
   return 0;
 }

@@ -42,4 +42,7 @@ test_exec(create-n-fibers tests/create-n-fibers.c)
 add_test(create-0-fibers create-n-fibers 0)
 add_test(create-100-fibers create-n-fibers 100)
 add_test(create-10000-fibers create-n-fibers 10000)
-add_test(create-10000000-fibers create-n-fibers 10000000)
+add_test(create-1000000-fibers create-n-fibers 1000000)
+
+test_exec(melon_sleep tests/melon_sleep.c)
+add_test(melon_sleep melon_sleep)

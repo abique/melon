@@ -17,7 +17,7 @@ extern "C" {
     kEventIoRead,
     kEventIoWrite,
     kEventDestroy,
-    kEventTimeout,
+    kEventTimer,
   } MelonEvent;
 
   /* enum MelonFiberState */
@@ -61,6 +61,10 @@ extern "C" {
     const char *         name;
     void                 (*callback)(void * ctx);
     void *               callback_ctx;
+
+    /* after sched_next callback */
+    void           (*sched_next_cb)(void * ctx);
+    void *         sched_next_ctx;
   } melon_fiber;
 
   typedef struct melon

@@ -5,7 +5,8 @@
    CLOSED: [2011-07-10 Sun 12:34]
 ** TODO mutex_lock/mutex_unlock
 ** TODO cond_wait/cond_notify*
-** TODO timer manager
+** DONE timer manager
+   CLOSED: [2011-07-14 Thu 11:37]
 ** TODO io manager
 ** DONE scheduler
    CLOSED: [2011-07-09 Sat 23:01]

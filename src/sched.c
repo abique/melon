@@ -42,8 +42,12 @@ void * melon_sched_run(void * dummy)
   while (!g_melon.stop)
   {
     sched_next();
-    if (g_current_fiber && g_current_fiber->waited_event == kEventDestroy)
-      melon_fiber_destroy(g_current_fiber);
+    if (g_current_fiber && g_current_fiber->sched_next_cb)
+    {
+      g_current_fiber->sched_next_cb(g_current_fiber->sched_next_ctx);
+      g_current_fiber->sched_next_cb  = NULL;
+      g_current_fiber->sched_next_ctx = NULL;
+    }
   }
   return NULL;
 }

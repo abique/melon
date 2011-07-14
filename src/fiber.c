@@ -36,6 +36,8 @@ static void melon_fiber_wrapper(void)
   if (__sync_add_and_fetch(&g_melon.fibers_count, -1) == 0)
     pthread_cond_broadcast(&g_melon.fibers_count_zero);
 
+  self->sched_next_cb  = (void(*)(void*))melon_fiber_destroy;
+  self->sched_next_ctx = self;
   melon_sched_next();
   assert(0 && "should never be reached");
 }
@@ -57,6 +59,8 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   fiber->name             = "(none)";
   fiber->callback         = fct;
   fiber->callback_ctx     = ctx;
+  fiber->sched_next_cb    = NULL;
+  fiber->sched_next_ctx   = NULL;
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
   int ret = getcontext(&fiber->ctx);

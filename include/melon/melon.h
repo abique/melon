@@ -72,7 +72,7 @@ extern "C" {
    * POSIX functions
    * @{
    */
-  uint32_t melon_sleep(uint32_t secs);
+  unsigned int melon_sleep(uint32_t secs);
   int melon_usleep(uint64_t usecs);
 
   ssize_t melon_write(int fildes, const void * data, size_t nbyte, uint64_t timeout);

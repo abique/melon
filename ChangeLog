@@ -1,5 +1,7 @@
 2011-07-14  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.2.0
+	* timer_manager: stable
 	* spinlock.h: moved to public headers
 	* melonpp.hh: added a google go like channel
 	* melonpp.hh: added C++ binding to melon

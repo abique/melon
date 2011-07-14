@@ -17,6 +17,7 @@ extern "C" {
     kEventIoRead,
     kEventIoWrite,
     kEventDestroy,
+    kEventTimeout,
   } MelonEvent;
 
   /* enum MelonFiberState */
@@ -53,6 +54,7 @@ extern "C" {
   {
     struct melon_fiber * next; // usefull for intrusive linking
     uint64_t             timeout;
+    struct melon_fiber * timeout_next; // usefull for intrusive linking
     ucontext_t           ctx;
     MelonEvent           waited_event;
     int                  is_detached;
@@ -84,10 +86,10 @@ extern "C" {
     melon_fiber ** threads_fiber; // running fiber
 
     /* the time func */
-    melon_time_f time_func;
-    void *       time_ctx;
-    pthread_t    timer_thread;
-    melon_time_t timer_resolution;
+    pthread_t       timer_thread;
+    //pthread_mutex_t timeout_mutex;
+    pthread_cond_t  timeout_cond;
+    melon_fiber *   timeout_queue; // sorted
 
     /* stop the runtime */
     int stop;
@@ -104,7 +106,7 @@ extern "C" {
   /** Schedule the next fiber and stops the current (if there is one).
    * The old fiber will not be put in the ready queue like yield would do,
    * so think to a mechanism to wake up the old fiber. */
-  void melon_sched_next();
+  void melon_sched_next(void);
   /** lock g_melon.lock and pushes the fiber list in the ready queue */
   void melon_sched_ready(melon_fiber * list);
   /** call this one if you have locked g_melon.lock */
@@ -122,50 +124,50 @@ extern "C" {
 
   void melon_fiber_destroy(melon_fiber * fiber);
 
-  int melon_stack_init();
-  void melon_stack_deinit();
-  void * melon_stack_alloc();
+  int melon_stack_init(void);
+  void melon_stack_deinit(void);
+  void * melon_stack_alloc(void);
   void melon_stack_free(void * addr);
-  uint32_t melon_stack_size();
+  uint32_t melon_stack_size(void);
 
   extern __thread melon_fiber * g_current_fiber;
   extern __thread ucontext_t    g_root_ctx;
 
   // circular linked list
-# define melon_list_push(List, Item)            \
+# define melon_list_push(List, Item, Member)    \
   do {                                          \
     if (!(List))                                \
     {                                           \
       (List) = (Item);                          \
-      (Item)->next = (Item);                    \
+      (Item)->Member = (Item);                  \
     }                                           \
     else                                        \
     {                                           \
-      (Item)->next = (List)->next;              \
-      (List)->next = (Item);                    \
+      (Item)->Member = (List)->Member;          \
+      (List)->Member = (Item);                  \
       (List) = (Item);                          \
     }                                           \
   } while (0)
 
-# define melon_list_pop(List, Item)             \
+# define melon_list_pop(List, Item, Member)     \
   do {                                          \
     /* empty list */                            \
     if (!(List))                                \
       (Item) = NULL;                            \
     /* just 1 element */                        \
-    else if ((List) == (List)->next ||          \
-             (List)->next == NULL)              \
+    else if ((List) == (List)->Member ||        \
+             (List)->Member == NULL)            \
     {                                           \
       (Item) = (List);                          \
-      (Item)->next = NULL;                      \
+      (Item)->Member = NULL;                    \
       (List) = NULL;                            \
     }                                           \
     /* many elements */                         \
     else                                        \
     {                                           \
-      (Item) = (List)->next;                    \
-      (List)->next = (Item)->next;              \
-      (Item)->next = NULL;                      \
+      (Item) = (List)->Member;                  \
+      (List)->Member = (Item)->Member;          \
+      (Item)->Member = NULL;                    \
     }                                           \
   } while (0)
 

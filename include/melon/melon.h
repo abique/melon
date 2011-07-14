@@ -34,6 +34,7 @@ extern "C" {
    * of the ready queue */
   void melon_yield(void);
 
+  typedef int64_t melon_time_t;
   /** gets the time in nanoseconds */
   melon_time_t melon_time(void);
   /** @} */

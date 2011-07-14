@@ -31,7 +31,7 @@ void melon_stack_deinit()
   melon_spin_lock(&g_stack_list_lock);
   while (1)
   {
-    melon_list_pop(g_stack_list, item);
+    melon_list_pop(g_stack_list, item, next);
     if (!item)
       break;
     munmap((void*)item, SIGSTKSZ);
@@ -55,7 +55,7 @@ void * melon_stack_alloc()
   }
 
   list * item;
-  melon_list_pop(g_stack_list, item);
+  melon_list_pop(g_stack_list, item, next);
   --g_stack_list_nb;
   melon_spin_unlock(&g_stack_list_lock);
   return (void*)item;
@@ -74,7 +74,7 @@ void melon_stack_free(void * addr)
   melon_spin_lock(&g_stack_list_lock);
   ++g_stack_list_nb;
   list * item = (list*)addr;
-  melon_list_push(g_stack_list, item);
+  melon_list_push(g_stack_list, item, next);
   melon_spin_unlock(&g_stack_list_lock);
 }
 

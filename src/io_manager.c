@@ -26,7 +26,7 @@ static void melon_io_manager_handle(struct epoll_event * event)
       tmp_fiber           = fiber;
       fiber->waited_event = kEventNone;
       fiber               = fiber->next;
-      melon_list_push(g_melon.ready, tmp_fiber);
+      melon_list_push(g_melon.ready, tmp_fiber, next);
     }
     else
       fiber = fiber->next;

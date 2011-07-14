@@ -18,7 +18,7 @@ static void sched_next()
       return;
     }
 
-    melon_list_pop(g_melon.ready, g_current_fiber);
+    melon_list_pop(g_melon.ready, g_current_fiber, next);
     if (!g_current_fiber)
     {
       int ret = pthread_cond_wait(&g_melon.ready_cond, &g_melon.lock);
@@ -62,11 +62,11 @@ void melon_sched_ready_locked(melon_fiber * list)
 
   while (1)
   {
-    melon_list_pop(list, fiber);
+    melon_list_pop(list, fiber, next);
     if (!fiber)
       break;
     fiber->waited_event = kEventNone;
-    melon_list_push(g_melon.ready, fiber);
+    melon_list_push(g_melon.ready, fiber, next);
     ++nb;
   }
 

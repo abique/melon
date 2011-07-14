@@ -27,6 +27,9 @@ endmacro(test_exec)
 test_exec(list tests/list.c)
 add_test(list list)
 
+test_exec(dlist tests/dlist.c)
+add_test(dlist dlist)
+
 test_exec(stack_alloc tests/stack_alloc.c)
 add_test(stack_alloc stack_alloc)
 

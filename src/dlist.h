@@ -7,48 +7,46 @@
     if (!(List))                                        \
     {                                                   \
       (List) = (Item);                                  \
-      (Item)->Prefix##_next = (Item);                   \
-      (Item)->Prefix##_Prefix##_prev = (Item);          \
+      (Item)->Prefix##next = (Item);                    \
+      (Item)->Prefix##prev = (Item);                    \
     }                                                   \
     else                                                \
     {                                                   \
-      (Item)->Prefix##_next = (List);                   \
-      (Item)->Prefix##_prev = (List)->Prefix##_prev;    \
-      (Item)->Prefix##_next->Prefix##_prev = (Item);    \
-      (Item)->Prefix##_prev->Prefix##_next = (Item);    \
+      (Item)->Prefix##next = (List);                    \
+      (Item)->Prefix##prev = (List)->Prefix##prev;      \
+      (Item)->Prefix##next->Prefix##prev = (Item);      \
+      (Item)->Prefix##prev->Prefix##next = (Item);      \
     }                                                   \
   } while (0)
 
 # define melon_dlist_unlink(List, Item, Prefix)                         \
   do {                                                                  \
     /* just 1 element */                                                \
-    if ((List) == (List)->Prefix##_next)                                \
+    if ((List) == (List)->Prefix##next)                                 \
     {                                                                   \
-      (Item)->Prefix##_next = NULL;                                     \
-      (Item)->Prefix##_prev = NULL;                                     \
+      (Item)->Prefix##next = NULL;                                      \
+      (Item)->Prefix##prev = NULL;                                      \
       (List) = NULL;                                                    \
     }                                                                   \
     /* many elements */                                                 \
     else                                                                \
     {                                                                   \
-      (Item)->Prefix##_next->Prefix##_prev = (Item)->Prefix##_prev;     \
-      (Item)->Prefix##_prev->Prefix##_next = (Item)->Prefix##_next;     \
-      (Item)->Prefix##_next = NULL;                                     \
-      (Item)->Prefix##_prev = NULL;                                     \
+      if ((List) == (Item))                                             \
+        (List) = (Item)->Prefix##next;                                  \
+      (Item)->Prefix##next->Prefix##prev = (Item)->Prefix##prev;        \
+      (Item)->Prefix##prev->Prefix##next = (Item)->Prefix##next;        \
+      (Item)->Prefix##next = NULL;                                      \
+      (Item)->Prefix##prev = NULL;                                      \
+                                                                        \
     }                                                                   \
   } while (0)
 
 
-# define melon_dlist_pop(List, Item, Prefix)    \
-  do {                                          \
-    /* empty list */                            \
-    if (!(List))                                \
-      (Item) = NULL;                            \
-    else                                        \
-    {                                           \
-      (Item) = (List)->Prefix##_prev;           \
-      melon_dlist_unlink(List, (Item), Prefix); \
-    }                                           \
+# define melon_dlist_pop(List, Item, Prefix)            \
+  do {                                                  \
+    (Item) = (List);                                    \
+    if ((Item))                                         \
+      melon_dlist_unlink((List), (Item), Prefix);       \
   } while (0)
 
 

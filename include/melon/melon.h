@@ -25,6 +25,7 @@ extern "C" {
   void melon_wait(void);
   void melon_deinit(void);
 
+  typedef struct melon_fiber melon_fiber;
   /** creates a new fiber
    * @return 0 on success */
   int melon_fiber_start(void (*fct)(void *), void * ctx);
@@ -43,29 +44,33 @@ extern "C" {
    * Synchronisation functions
    * @{
    */
-  struct melon_mutex * melon_mutex_new(void);
-  void melon_mutex_destroy(struct melon_mutex * mutex);
-  void melon_mutex_lock(struct melon_mutex * mutex);
-  void melon_mutex_unlock(struct melon_mutex * mutex);
-  int melon_mutex_trylock(struct melon_mutex * mutex);
-  int melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
+  typedef struct melon_mutex melon_mutex;
+  typedef struct melon_rwlock melon_rwlock;
+  typedef struct melon_cond melon_cond;
 
-  struct melon_rwlock * melon_rwlock_new(void);
-  void melon_rwlock_destroy(struct melon_rwlock * rwlock);
-  void melon_rwlock_rdlock(struct melon_rwlock * rwlock);
-  int melon_rwlock_tryrdlock(struct melon_rwlock * rwlock);
-  int melon_rwlock_timedrdlock(struct melon_rwlock * rwlock, uint64_t timeout);
-  void melon_rwlock_wrlock(struct melon_rwlock * rwlock);
-  int melon_rwlock_trywrlock(struct melon_rwlock * rwlock);
-  int melon_rwlock_timedwrlock(struct melon_rwlock * rwlock, uint64_t timeout);
-  void melon_rwlock_unlock(struct melon_rwlock * rwlock);
+  melon_mutex * melon_mutex_new(void);
+  void melon_mutex_destroy(melon_mutex * mutex);
+  void melon_mutex_lock(melon_mutex * mutex);
+  void melon_mutex_unlock(melon_mutex * mutex);
+  int melon_mutex_trylock(melon_mutex * mutex);
+  int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout);
 
-  struct melon_cond * melon_cond_new(void);
-  void melon_cond_destroy(struct melon_cond * condition);
-  void melon_cond_wait(struct melon_cond * condition, struct melon_mutex * mutex);
-  void melon_cond_timedwait(struct melon_cond * condition, struct melon_mutex * mutex, uint64_t timeout);
-  void melon_cond_signal(struct melon_cond * condition);
-  void melon_cond_broadcast(struct melon_cond * condition);
+  melon_rwlock * melon_rwlock_new(void);
+  void melon_rwlock_destroy(melon_rwlock * rwlock);
+  void melon_rwlock_rdlock(melon_rwlock * rwlock);
+  int melon_rwlock_tryrdlock(melon_rwlock * rwlock);
+  int melon_rwlock_timedrdlock(melon_rwlock * rwlock, uint64_t timeout);
+  void melon_rwlock_wrlock(melon_rwlock * rwlock);
+  int melon_rwlock_trywrlock(melon_rwlock * rwlock);
+  int melon_rwlock_timedwrlock(melon_rwlock * rwlock, uint64_t timeout);
+  void melon_rwlock_unlock(melon_rwlock * rwlock);
+
+  melon_cond * melon_cond_new(void);
+  void melon_cond_destroy(melon_cond * condition);
+  void melon_cond_wait(melon_cond * condition, melon_mutex * mutex);
+  void melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
+  void melon_cond_signal(melon_cond * condition);
+  void melon_cond_broadcast(melon_cond * condition);
   /** @} */
 
   /**

@@ -34,23 +34,28 @@ extern "C" {
 
   typedef void (*melon_callback)(void * ctx);
 
-  typedef struct melon_event
+  struct melon_event
   {
     struct melon_event * next;
     enum MelonEvent      event;
-  } melon_event;
+  };
 
-  typedef struct melon_mutex
+  struct melon_mutex
   {
-  } melon_mutex;
+    melon_spinlock lock;
+    melon_fiber *  owner;
+    melon_fiber *  lock_queue;
+    int            is_recursive;
+    int            lock_count;
+  };
 
-  typedef struct melon_rwmutex
+  struct melon_rwmutex
   {
-  } melon_rwmutex;
+  };
 
-  typedef struct melon_cond
+  struct melon_cond
   {
-  } melon_cond;
+  };
 
   typedef struct melon_fiber
   {

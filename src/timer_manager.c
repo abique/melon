@@ -42,7 +42,6 @@ void * melon_timer_manager_loop(void * dummy)
   return NULL;
 }
 
-
 int melon_timer_manager_init(void)
 {
   pthread_condattr_t cond_attr;

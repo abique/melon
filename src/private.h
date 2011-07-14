@@ -32,6 +32,8 @@ extern "C" {
   /*   kFinished */
   /* }; */
 
+  typedef void (*melon_callback)(void * ctx);
+
   typedef struct melon_event
   {
     struct melon_event * next;
@@ -53,14 +55,20 @@ extern "C" {
   typedef struct melon_fiber
   {
     struct melon_fiber * next; // usefull for intrusive linking
-    melon_time_t         timer;
-    struct melon_fiber * timer_next; // usefull for intrusive linking
     ucontext_t           ctx;
     MelonEvent           waited_event;
     int                  is_detached;
     const char *         name;
-    void                 (*callback)(void * ctx);
-    void *               callback_ctx;
+
+    /* start callback */
+    melon_callback       start_cb;
+    void *               start_ctx;
+
+    /* timer stuff */
+    melon_time_t         timer;
+    struct melon_fiber * timer_next; // usefull for intrusive linking
+    melon_callback       timer_cb;
+    void *               timer_ctx;
 
     /* after sched_next callback */
     void           (*sched_next_cb)(void * ctx);

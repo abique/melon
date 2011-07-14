@@ -28,8 +28,8 @@ static void melon_fiber_wrapper(void)
 
   assert(self);
   assert(!self->ctx.uc_link);
-  assert(self->callback);
-  self->callback(self->callback_ctx);
+  assert(self->start_cb);
+  self->start_cb(self->start_ctx);
   self->waited_event = kEventDestroy;
 
   /* decrement the fibers count and if 0, then broadcast the cond */
@@ -50,17 +50,17 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   melon_fiber * fiber = malloc(sizeof (melon_fiber));
   if (!fiber)
     return -1;
-  fiber->next             = NULL;
-  fiber->timer            = 0;
-  fiber->timer_next       = NULL;
+  fiber->next           = NULL;
+  fiber->timer          = 0;
+  fiber->timer_next     = NULL;
   memset(&fiber->ctx, 0, sizeof (fiber->ctx));
-  fiber->waited_event     = kEventNone;
-  fiber->is_detached      = 0;
-  fiber->name             = "(none)";
-  fiber->callback         = fct;
-  fiber->callback_ctx     = ctx;
-  fiber->sched_next_cb    = NULL;
-  fiber->sched_next_ctx   = NULL;
+  fiber->waited_event   = kEventNone;
+  fiber->is_detached    = 0;
+  fiber->name           = "(none)";
+  fiber->start_cb       = fct;
+  fiber->start_ctx      = ctx;
+  fiber->sched_next_cb  = NULL;
+  fiber->sched_next_ctx = NULL;
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
   int ret = getcontext(&fiber->ctx);

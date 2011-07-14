@@ -20,24 +20,15 @@ void * melon_timer_manager_loop(void * dummy)
   while (!g_melon.stop)
   {
     melon_time_t  time  = melon_time();
-    melon_fiber * ready = NULL;
     melon_fiber * curr  = g_melon.timer_queue;
     while (curr && curr->timer <= time)
     {
       g_melon.timer_queue = curr->timer_next;
       curr->timer_next = NULL;
-      switch (curr->waited_event)
-      {
-      case kEventIoRead:
-      case kEventIoWrite:
-      case kEventTimer:
-      default:
-        break;
-      }
-      melon_list_push(ready, curr, next);
+      assert(curr->timer_cb);
+      curr->timer_cb(curr->timer_ctx);
       curr = g_melon.timer_queue;
     }
-    melon_sched_ready_locked(ready);
     if (g_melon.timer_queue)
     {
       struct timespec tp;
@@ -119,11 +110,18 @@ unsigned int melon_sleep(uint32_t secs)
   return melon_usleep(secs * 1000 * 1000);
 }
 
+static void melon_usleep_cb(melon_fiber * fiber)
+{
+  melon_sched_ready_locked(fiber);
+}
+
 int melon_usleep(uint64_t usecs)
 {
   melon_fiber * self = melon_fiber_self();
   self->waited_event = kEventTimer;
   self->timer = melon_time() + usecs * 1000;
+  self->timer_cb = (melon_callback)melon_usleep_cb;
+  self->timer_ctx = self;
   melon_timer_push();
   return 0;
 }

@@ -20,3 +20,15 @@ Melon is an experimental fiber M:N library implementation.
 It should be portable, but it's developped and tested on Linux ATM.
 
 Cheers
+
+
+Dependencies
+~~~~~~~~~~~~
+
+ - c99 (gcc or clang)
+ - pthreads
+ - linux/epoll
+ - *bsd/kqueue [not implemented yet]
+ - solaris,windows/iocp [not implemented yet]
+ - cmake
+

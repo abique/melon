@@ -22,8 +22,8 @@ extern "C" {
    * @return 0 on success, non zero else */
   int melon_init(uint16_t nb_threads);
   /** blocks until there is no more fibers left in melon */
-  void melon_wait();
-  void melon_deinit();
+  void melon_wait(void);
+  void melon_deinit(void);
 
   /** creates a new fiber
    * @return 0 on success */
@@ -32,24 +32,24 @@ extern "C" {
 
   /** schedules next fibers and put the current one in the back
    * of the ready queue */
-  void melon_yield();
+  void melon_yield(void);
 
   /** gets the time in nanoseconds */
-  melon_time_t melon_time();
+  melon_time_t melon_time(void);
   /** @} */
 
   /**
    * Synchronisation functions
    * @{
    */
-  struct melon_mutex * melon_mutex_new();
+  struct melon_mutex * melon_mutex_new(void);
   void melon_mutex_destroy(struct melon_mutex * mutex);
   void melon_mutex_lock(struct melon_mutex * mutex);
   void melon_mutex_unlock(struct melon_mutex * mutex);
   int melon_mutex_trylock(struct melon_mutex * mutex);
   int melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
 
-  struct melon_rwlock * melon_rwlock_new();
+  struct melon_rwlock * melon_rwlock_new(void);
   void melon_rwlock_destroy(struct melon_rwlock * rwlock);
   void melon_rwlock_rdlock(struct melon_rwlock * rwlock);
   int melon_rwlock_tryrdlock(struct melon_rwlock * rwlock);
@@ -59,7 +59,7 @@ extern "C" {
   int melon_rwlock_timedwrlock(struct melon_rwlock * rwlock, uint64_t timeout);
   void melon_rwlock_unlock(struct melon_rwlock * rwlock);
 
-  struct melon_cond * melon_cond_new();
+  struct melon_cond * melon_cond_new(void);
   void melon_cond_destroy(struct melon_cond * condition);
   void melon_cond_wait(struct melon_cond * condition, struct melon_mutex * mutex);
   void melon_cond_timedwait(struct melon_cond * condition, struct melon_mutex * mutex, uint64_t timeout);

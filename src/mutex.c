@@ -33,7 +33,7 @@ void melon_mutex_lock(struct melon_mutex * mutex)
     if (!is_recursive)
       assert(0 && "logic error, relocking non-recursive mutex");
     ++mutex->lock_count;
-    mutex->is_recursive = 1;
+    mutex->is_recursive = 2;
     melon_spin_unlock(&mutex->lock);
   }
   else
@@ -48,10 +48,26 @@ void melon_mutex_lock(struct melon_mutex * mutex)
 void melon_mutex_unlock(struct melon_mutex * mutex)
 {
   assert(mutex);
+
+  if (mutex->is_recursive)
+    if (--mutex->lock_count > 0)
+      return;
+
   melon_spin_lock(&mutex->lock);
-  // todo, relock in the right order before pushing in the ready queue
-  // to avoid deadlock with the timer manager.
+  if (!mutex->lock_queue)
+  {
+    mutex->owner = NULL;
+    return;
+  }
   melon_spin_unlock(&mutex->lock);
+
+  pthread_mutex_lock(&g_melon.lock);
+  melon_spin_lock(&mutex->lock);
+  melon_list_pop(mutex->lock_queue, mutex->owner, next);
+  if (mutex->owner)
+    melon_sched_ready(mutex->owner);
+  melon_spin_unlock(&mutex->lock);
+  pthread_mutex_unlock(&g_melon.lock);
 }
 
 int melon_mutex_trylock(struct melon_mutex * mutex)

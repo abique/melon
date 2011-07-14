@@ -59,7 +59,7 @@ extern "C" {
   {
   };
 
-  typedef struct melon_fiber
+  struct melon_fiber
   {
     struct melon_fiber * next;  // usefull for intrusive linking
     struct melon_fiber * prev;
@@ -82,7 +82,7 @@ extern "C" {
     /* after sched_next callback */
     melon_callback       sched_next_cb;
     void *               sched_next_ctx;
-  } melon_fiber;
+  };
 
   typedef struct melon
   {

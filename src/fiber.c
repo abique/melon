@@ -49,8 +49,8 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   if (!fiber)
     return -1;
   fiber->next             = NULL;
-  fiber->timeout          = 0;
-  fiber->timeout_next     = NULL;
+  fiber->timer            = 0;
+  fiber->timer_next       = NULL;
   memset(&fiber->ctx, 0, sizeof (fiber->ctx));
   fiber->waited_event     = kEventNone;
   fiber->is_detached      = 0;

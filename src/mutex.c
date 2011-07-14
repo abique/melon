@@ -65,7 +65,11 @@ void melon_mutex_unlock(struct melon_mutex * mutex)
   melon_spin_lock(&mutex->lock);
   melon_list_pop(mutex->lock_queue, mutex->owner, next);
   if (mutex->owner)
+  {
+    if (mutex->owner->timer)
+      melon_timer_remove_locked(mutex->owner);
     melon_sched_ready(mutex->owner);
+  }
   melon_spin_unlock(&mutex->lock);
   pthread_mutex_unlock(&g_melon.lock);
 }
@@ -85,4 +89,37 @@ int melon_mutex_trylock(struct melon_mutex * mutex)
   return EBUSY;
 }
 
-int melon_mutex_timedlock(struct melon_mutex * mutex, uint64_t timeout);
+static void melon_mutex_timedlock_cb(melon_mutex * mutex)
+{
+  melon_spin_lock(&mutex->lock);
+  // TODO remove from mutex->lock_queue
+  melon_spin_unlock(&mutex->lock);
+}
+
+int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
+{
+  // lets do a first spinlock only try
+  if (!melon_mutex_trylock(mutex))
+    return 0;
+
+  // ok now real stuff, we have to setup timeout and the queue
+  pthread_mutex_lock(&g_melon.lock);
+  melon_spin_lock(&mutex->lock);
+
+  if (!mutex->owner)
+  {
+    mutex->owner = melon_fiber_self();
+    melon_spin_unlock(&mutex->lock);
+    pthread_mutex_unlock(&g_melon.lock);
+    return 0;
+  }
+
+  melon_fiber * self = melon_fiber_self();
+  melon_list_push(mutex->lock_queue, self, next);
+  self->timer = timeout;
+  self->timer_cb = melon_mutex_timedlock_cb;
+  self->timer_ctx = mutex;
+
+  melon_spin_unlock(&mutex->lock);
+  pthread_mutex_unlock(&g_melon.lock);
+}

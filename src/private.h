@@ -59,25 +59,27 @@ extern "C" {
 
   typedef struct melon_fiber
   {
-    struct melon_fiber * next; // usefull for intrusive linking
+    struct melon_fiber * next;  // usefull for intrusive linking
+    struct melon_fiber * prev;
     ucontext_t           ctx;
     MelonEvent           waited_event;
     int                  is_detached;
     const char *         name;
 
     /* start callback */
-    melon_callback       start_cb;
-    void *               start_ctx;
+    melon_callback start_cb;
+    void *         start_ctx;
 
     /* timer stuff */
     melon_time_t         timer;
     struct melon_fiber * timer_next; // usefull for intrusive linking
+    struct melon_fiber * timer_prev;
     melon_callback       timer_cb;
     void *               timer_ctx;
 
     /* after sched_next callback */
-    void           (*sched_next_cb)(void * ctx);
-    void *         sched_next_ctx;
+    melon_callback       sched_next_cb;
+    void *               sched_next_ctx;
   } melon_fiber;
 
   typedef struct melon
@@ -141,6 +143,9 @@ extern "C" {
   /** pushes the current fiber (\see melon_fiber_self()) in the timer queue
    * using fiber->timeout as absolute time (\see melon_time()). */
   void melon_timer_push();
+  /** removes the fiber from the timer_manager's queue.
+   * also assume that g_melon.lock is locked */
+  void melon_timer_remove_locked(melon_fiber * fiber);
 
   void melon_fiber_destroy(melon_fiber * fiber);
 

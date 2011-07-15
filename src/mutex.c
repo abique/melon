@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "private.h"
 
 melon_mutex * melon_mutex_new(void)
@@ -7,19 +9,19 @@ melon_mutex * melon_mutex_new(void)
   if (!mutex)
     return NULL;
   melon_spin_init(&mutex->lock);
-  mutex->owner = NULL;
-  mutex->lock_queue = NULL;
+  mutex->owner        = NULL;
+  mutex->lock_queue   = NULL;
   mutex->is_recursive = 0;
-  mutex->lock_count = 0;
+  mutex->lock_count   = 0;
   return mutex;
 }
 
 void melon_mutex_destroy(struct melon_mutex * mutex)
 {
-  melon_spinlock(&mutex->lock);
-  assert(!lock_count);
-  assert(!owner);
-  assert(!lock_queue);
+  melon_spin_lock(&mutex->lock);
+  assert(!mutex->lock_count);
+  assert(!mutex->owner);
+  assert(!mutex->lock_queue);
   free(mutex);
 }
 
@@ -31,7 +33,7 @@ void melon_mutex_lock(struct melon_mutex * mutex)
   self->timer = 0;
   if (mutex->owner == self)
   {
-    if (!is_recursive)
+    if (!mutex->is_recursive)
       assert(0 && "logic error, relocking non-recursive mutex");
     ++mutex->lock_count;
     mutex->is_recursive = 2;

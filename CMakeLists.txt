@@ -13,6 +13,7 @@ add_library(melon
   src/io_manager.c
   src/timer_manager.c
   src/stack_alloc.c
+  src/mutex.c
 )
 target_link_libraries(melon pthread rt)
 

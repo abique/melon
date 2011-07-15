@@ -50,3 +50,6 @@ add_test(create-1000000-fibers create-n-fibers 1000000)
 
 test_exec(melon_sleep tests/melon_sleep.c)
 add_test(melon_sleep melon_sleep)
+
+test_exec(mutex_simple tests/mutex_simple.c)
+add_test(mutex_simple tests/mutex_simple.c)

@@ -23,8 +23,7 @@ void * melon_timer_manager_loop(void * dummy)
     melon_fiber * curr  = g_melon.timer_queue;
     while (curr && curr->timer <= time)
     {
-      g_melon.timer_queue = curr->timer_next;
-      curr->timer_next = NULL;
+      melon_dlist_unlink(g_melon.timer_queue, curr, timer_);
       assert(curr->timer_cb);
       curr->timer_cb(curr->timer_ctx);
       curr = g_melon.timer_queue;
@@ -87,19 +86,12 @@ void melon_timer_push(void)
       break;
     prev = curr;
     curr = curr->timer_next;
+    if (curr == g_melon.timer_queue)
+      break;
   }
+  melon_dlist_insert(g_melon.timer_queue, prev, fiber, timer_);
   if (!prev)
-  {
-    fiber->timer_next = g_melon.timer_queue;
-    g_melon.timer_queue = fiber;
-    if (!fiber->timer_next || fiber->timer != fiber->timer_next->timer)
-      pthread_cond_signal(&g_melon.timer_cond);
-  }
-  else
-  {
-    fiber->timer_next = curr;
-    prev->timer_next = fiber;
-  }
+    pthread_cond_signal(&g_melon.timer_cond);
   fiber->sched_next_cb  = (void(*)(void*))pthread_mutex_unlock;
   fiber->sched_next_ctx = &g_melon.lock;
   melon_sched_next();

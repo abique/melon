@@ -16,6 +16,7 @@ melon_time_t melon_time(void)
 void * melon_timer_manager_loop(void * dummy)
 {
   (void)dummy;
+
   pthread_mutex_lock(&g_melon.lock);
   while (!g_melon.stop)
   {
@@ -94,6 +95,11 @@ void melon_timer_push(void)
     pthread_cond_signal(&g_melon.timer_cond);
   pthread_mutex_unlock(&g_melon.lock);
   melon_sched_next();
+}
+
+void melon_timer_remove_locked(melon_fiber * fiber)
+{
+  melon_dlist_unlink(g_melon.timer_queue, fiber, timer_);
 }
 
 unsigned int melon_sleep(uint32_t secs)

@@ -46,7 +46,7 @@ extern "C" {
   {
     melon_spinlock lock;
     melon_fiber *  owner;
-    melon_fiber *  lock_queue;
+    melon_fiber *  lock_queue; /* dlist for fast removal in timedlock */
     int            is_recursive;
     int            lock_count;
   };
@@ -110,7 +110,7 @@ extern "C" {
     pthread_t       timer_thread;
     //pthread_mutex_t timeout_mutex;
     pthread_cond_t  timer_cond;
-    melon_fiber *   timer_queue; // sorted
+    melon_fiber *   timer_queue; // dlist sorted
 
     /* stop the runtime */
     int stop;

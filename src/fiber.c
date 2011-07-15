@@ -20,6 +20,8 @@ void melon_fiber_destroy(melon_fiber * fiber)
 {
   melon_stack_free(fiber->ctx.uc_stack.ss_sp);
   free(fiber);
+  if (g_current_fiber == fiber)
+    g_current_fiber = NULL;
 }
 
 static void melon_fiber_wrapper(void)
@@ -51,10 +53,10 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   if (!fiber)
     return -1;
   fiber->next           = NULL;
+  fiber->prev           = NULL;
   fiber->timer          = 0;
   fiber->timer_next     = NULL;
   fiber->timer_prev     = NULL;
-  memset(&fiber->ctx, 0, sizeof (fiber->ctx));
   fiber->waited_event   = kEventNone;
   fiber->is_detached    = 0;
   fiber->name           = "(none)";
@@ -62,6 +64,7 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   fiber->start_ctx      = ctx;
   fiber->sched_next_cb  = NULL;
   fiber->sched_next_ctx = NULL;
+  melon_spin_init(&fiber->lock);
 
   /* allocate the stack, TODO: have a stack allocator with a cache */
   int ret = getcontext(&fiber->ctx);

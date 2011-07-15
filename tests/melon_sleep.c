@@ -13,20 +13,15 @@ static void timer(void * dummy)
   melon_sleep(2);
 }
 
-int main(void)
+MELON_MAIN(argc, argv)
 {
-  if (melon_init(0))
-    return 1;
+  (void)argc;
+  (void)argv;
 
   for (int i = 1; i <= 100; ++i)
   {
     if (melon_fiber_start(timer, NULL + i))
       break;
   }
-
-  printf("waiting\n");
-  melon_wait();
-  printf("wait finished\n");
-  melon_deinit();
   return 0;
 }

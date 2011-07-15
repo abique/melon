@@ -28,6 +28,7 @@ void melon_mutex_lock(struct melon_mutex * mutex)
   assert(mutex);
   melon_spin_lock(&mutex->lock);
   melon_fiber * self = melon_fiber_self();
+  self->timer = 0;
   if (mutex->owner == self)
   {
     if (!is_recursive)
@@ -89,11 +90,20 @@ int melon_mutex_trylock(struct melon_mutex * mutex)
   return EBUSY;
 }
 
-static void melon_mutex_timedlock_cb(melon_mutex * mutex)
+struct lock_ctx
 {
-  melon_spin_lock(&mutex->lock);
-  // TODO remove from mutex->lock_queue
-  melon_spin_unlock(&mutex->lock);
+  melon_mutex * mutex;
+  melon_fiber * fiber;
+  int           timeout;
+};
+
+static void melon_mutex_timedlock_cb(struct lock_ctx * ctx)
+{
+  melon_spin_lock(&ctx->mutex->lock);
+  // remove from the lock_queue
+  melon_dlist_unlink(ctx->mutex->lock_queue, ctx->fiber, );
+  melon_spin_unlock(&ctx->mutex->lock);
+  ctx->timeout = 1;
 }
 
 int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
@@ -106,6 +116,7 @@ int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
   pthread_mutex_lock(&g_melon.lock);
   melon_spin_lock(&mutex->lock);
 
+  // just re-check owner
   if (!mutex->owner)
   {
     mutex->owner = melon_fiber_self();
@@ -114,12 +125,22 @@ int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
     return 0;
   }
 
+  struct lock_ctx ctx;
+  ctx.mutex   = mutex;
+  ctx.fiber   = g_current_fiber;
+  ctx.timeout = 0;
+
   melon_fiber * self = melon_fiber_self();
   melon_list_push(mutex->lock_queue, self, next);
-  self->timer = timeout;
-  self->timer_cb = melon_mutex_timedlock_cb;
-  self->timer_ctx = mutex;
+  self->timer        = timeout;
+  self->timer_cb     = melon_mutex_timedlock_cb;
+  self->timer_ctx    = &ctx;
 
   melon_spin_unlock(&mutex->lock);
   pthread_mutex_unlock(&g_melon.lock);
+  melon_sched_next();
+  if (!ctx.timeout)
+    return 0;
+  errno = ETIMEDOUT;
+  return -ETIMEDOUT;
 }

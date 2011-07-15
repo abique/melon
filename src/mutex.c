@@ -144,6 +144,7 @@ int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
   self->timer_cb     = (melon_callback)melon_mutex_timedlock_cb;
   self->timer_ctx    = &ctx;
 
+  melon_timer_push_locked();
   melon_spin_unlock(&mutex->lock);
   pthread_mutex_unlock(&g_melon.lock);
   melon_sched_next();

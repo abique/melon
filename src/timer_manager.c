@@ -73,13 +73,12 @@ void melon_timer_manager_deinit(void)
   pthread_cond_destroy(&g_melon.timer_cond);
 }
 
-void melon_timer_push(void)
+void melon_timer_push_locked(void)
 {
   melon_fiber * fiber = melon_fiber_self();
   melon_fiber * prev = NULL;
   melon_fiber * curr = NULL;
   fiber->timer_next = NULL;
-  pthread_mutex_lock(&g_melon.lock);
   curr = g_melon.timer_queue;
   while (curr)
   {
@@ -93,12 +92,20 @@ void melon_timer_push(void)
   melon_dlist_insert(g_melon.timer_queue, prev, fiber, timer_);
   if (!prev)
     pthread_cond_signal(&g_melon.timer_cond);
+}
+
+void melon_timer_push(void)
+{
+  pthread_mutex_lock(&g_melon.lock);
+  melon_timer_push_locked();
   pthread_mutex_unlock(&g_melon.lock);
   melon_sched_next();
 }
 
 void melon_timer_remove_locked(melon_fiber * fiber)
 {
+  assert(fiber->timer_next);
+  assert(fiber->timer_prev);
   melon_dlist_unlink(g_melon.timer_queue, fiber, timer_);
 }
 

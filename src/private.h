@@ -145,7 +145,9 @@ extern "C" {
   void melon_timer_manager_deinit(void);
   /** pushes the current fiber (\see melon_fiber_self()) in the timer queue
    * using fiber->timeout as absolute time (\see melon_time()). */
-  void melon_timer_push();
+  void melon_timer_push(void);
+  /** same as above, but you have to call melon_sched_next() */
+  void melon_timer_push_locked(void);
   /** removes the fiber from the timer_manager's queue.
    * also assume that g_melon.lock is locked */
   void melon_timer_remove_locked(melon_fiber * fiber);

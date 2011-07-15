@@ -13,7 +13,9 @@ static void fct(void * dummy)
   (void)dummy;
   for (int i = 0; i < 1000; ++i)
   {
-    melon_mutex_lock(mutex);
+    if (melon_mutex_trylock(mutex))
+      if (melon_mutex_timedlock(mutex, melon_time() + 1000 * 50))
+        melon_mutex_lock(mutex);
     ++nb;
     melon_mutex_unlock(mutex);
   }
@@ -26,7 +28,7 @@ MELON_MAIN(argc, argv)
   (void)argv;
 
   mutex = melon_mutex_new();
-  for (int i = 1; i <= 100; ++i)
+  for (int i = 1; i <= 1000; ++i)
     if (melon_fiber_start(fct, NULL + i))
       break;
   melon_wait();

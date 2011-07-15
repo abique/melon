@@ -115,6 +115,20 @@ extern "C" {
 
   /** @} */
 
+# define MELON_MAIN(Argc, Argv)                 \
+  int melon_main(int argc, char ** argv);       \
+  int main(int argc, char ** argv)              \
+  {                                             \
+    if (melon_init(0))                          \
+      return 1;                                 \
+    int ret = melon_main(argc, argv);           \
+    melon_wait();                               \
+    melon_deinit();                             \
+    return ret;                                 \
+  }                                             \
+  int melon_main(int Argc, char ** Argv)
+
+
 # ifdef MELON_OVERRIDE_POSIX
 
 #  ifdef sleep

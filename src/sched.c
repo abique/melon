@@ -28,8 +28,10 @@ static void sched_next()
   }
   pthread_mutex_unlock(&g_melon.lock);
 
+  melon_spin_lock(&g_current_fiber->lock);
   ret = swapcontext(&g_root_ctx, &g_current_fiber->ctx);
   assert(!ret);
+  melon_spin_unlock(&g_current_fiber->lock);
 }
 
 void * melon_sched_run(void * dummy)
@@ -44,9 +46,12 @@ void * melon_sched_run(void * dummy)
     sched_next();
     if (g_current_fiber && g_current_fiber->sched_next_cb)
     {
-      g_current_fiber->sched_next_cb(g_current_fiber->sched_next_ctx);
+      // do a copy because cb(ctx) may destroy the fiber and we wants
+      melon_callback cb  = g_current_fiber->sched_next_cb;
+      void *         ctx = g_current_fiber->sched_next_ctx;
       g_current_fiber->sched_next_cb  = NULL;
       g_current_fiber->sched_next_ctx = NULL;
+      cb(ctx);
     }
   }
   return NULL;

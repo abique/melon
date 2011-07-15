@@ -61,7 +61,8 @@ extern "C" {
 
   struct melon_fiber
   {
-    struct melon_fiber * next;  // usefull for intrusive linking
+    melon_spinlock       lock; // locked while running the fiber so it can't be ran two times
+    struct melon_fiber * next; // usefull for intrusive linking
     struct melon_fiber * prev;
     ucontext_t           ctx;
     MelonEvent           waited_event;

@@ -92,8 +92,7 @@ void melon_timer_push(void)
   melon_dlist_insert(g_melon.timer_queue, prev, fiber, timer_);
   if (!prev)
     pthread_cond_signal(&g_melon.timer_cond);
-  fiber->sched_next_cb  = (void(*)(void*))pthread_mutex_unlock;
-  fiber->sched_next_ctx = &g_melon.lock;
+  pthread_mutex_unlock(&g_melon.lock);
   melon_sched_next();
 }
 

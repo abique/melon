@@ -1,3 +1,8 @@
+2011-07-16  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* release: 0.3.0
+	* mutex: fixed implementation
+
 2011-07-14  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* release: 0.2.0

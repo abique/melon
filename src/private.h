@@ -57,17 +57,19 @@ extern "C" {
 
   struct melon_cond
   {
+    melon_spinlock lock;
+    melon_fiber *  wait_queue;
   };
 
   struct melon_fiber
   {
-    melon_spinlock       lock; // locked while running the fiber so it can't be ran two times
-    struct melon_fiber * next; // usefull for intrusive linking
-    struct melon_fiber * prev;
-    ucontext_t           ctx;
-    MelonEvent           waited_event;
-    int                  is_detached;
-    const char *         name;
+    melon_spinlock lock; // locked while running the fiber so it can't be ran two times
+    melon_fiber *  next; // usefull for intrusive linking
+    melon_fiber *  prev;
+    ucontext_t     ctx;
+    MelonEvent     waited_event;
+    int            is_detached;
+    const char *   name;
 
     /* start callback */
     melon_callback start_cb;
@@ -83,6 +85,12 @@ extern "C" {
     /* after sched_next callback */
     melon_callback       sched_next_cb;
     void *               sched_next_ctx;
+
+    /* while waiting on a condition, we save the locked mutex */
+    melon_mutex *        cond_mutex;
+
+    /* restore the lock count on cond_signal() */
+    int                  lock_count;
   };
 
   typedef struct melon
@@ -159,6 +167,8 @@ extern "C" {
   void * melon_stack_alloc(void);
   void melon_stack_free(void * addr);
   uint32_t melon_stack_size(void);
+
+  void melon_mutex_lock2(melon_fiber * fiber, melon_mutex * mutex);
 
   extern __thread melon_fiber * g_current_fiber;
   extern __thread ucontext_t    g_root_ctx;

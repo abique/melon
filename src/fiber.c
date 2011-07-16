@@ -64,6 +64,8 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   fiber->start_ctx      = ctx;
   fiber->sched_next_cb  = NULL;
   fiber->sched_next_ctx = NULL;
+  fiber->cond_mutex     = NULL;
+  fiber->lock_count     = 0;
   melon_spin_init(&fiber->lock);
 
   /* allocate the stack, TODO: have a stack allocator with a cache */

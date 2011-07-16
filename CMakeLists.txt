@@ -57,3 +57,6 @@ add_test(mutex_simple mutex_simple)
 
 test_exec(cond_1 tests/cond_1.c)
 add_test(cond_1 tests/cond_1.c)
+
+test_exec(cond_2 tests/cond_2.c)
+add_test(cond_2 tests/cond_2.c)

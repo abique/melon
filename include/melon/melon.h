@@ -68,7 +68,7 @@ extern "C" {
   melon_cond * melon_cond_new(void);
   void melon_cond_destroy(melon_cond * condition);
   void melon_cond_wait(melon_cond * condition, melon_mutex * mutex);
-  void melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
+  int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
   void melon_cond_signal(melon_cond * condition);
   void melon_cond_broadcast(melon_cond * condition);
   /** @} */

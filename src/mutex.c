@@ -163,6 +163,8 @@ int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
   melon_timer_push_locked();
   melon_spin_unlock(&mutex->lock);
   pthread_mutex_unlock(&g_melon.lock);
+
+  /* check timeout */
   melon_sched_next();
   if (!ctx.timeout)
     return 0;

@@ -13,27 +13,30 @@ static void fct2(void * dummy)
 {
   (void)dummy;
   melon_mutex_lock(mutex);
-  printf("fct: locked mutex\n");
+  printf("fct2: locked mutex\n");
   val = 42;
   melon_cond_signal(cond);
-  printf("fct: sent signal\n");
+  printf("fct2: sent signal\n");
   melon_mutex_unlock(mutex);
-  printf("fct: released mutex\n");
+  printf("fct2: released mutex\n");
 }
 
 static void fct1(void * dummy)
 {
   (void)dummy;
+  printf("fct1: xx\n");
   melon_mutex_lock(mutex);
   melon_fiber_start(fct2, NULL);
-  printf("main: cond wait\n");
+  printf("fct1: cond wait\n");
   melon_cond_wait(cond, mutex);
-  printf("main: woke up, got val: %d\n", val);
+  printf("fct1: woke up, got val: %d\n", val);
   melon_mutex_unlock(mutex);
 }
 
 int main(void)
 {
+  if (melon_init(0))
+    return 1;
   mutex = melon_mutex_new();
   cond = melon_cond_new();
   melon_fiber_start(fct1, NULL);

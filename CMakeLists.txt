@@ -53,4 +53,7 @@ test_exec(melon_sleep tests/melon_sleep.c)
 add_test(melon_sleep melon_sleep)
 
 test_exec(mutex_simple tests/mutex_simple.c)
-add_test(mutex_simple tests/mutex_simple.c)
+add_test(mutex_simple mutex_simple)
+
+test_exec(cond_1 tests/cond_1.c)
+add_test(cond_1 tests/cond_1.c)

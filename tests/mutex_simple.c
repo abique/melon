@@ -22,16 +22,18 @@ static void fct(void * dummy)
   printf("%p finished\n", dummy);
 }
 
-MELON_MAIN(argc, argv)
+int main(void)
 {
-  (void)argc;
-  (void)argv;
+  if (melon_init(0))
+    return 1;
 
   mutex = melon_mutex_new();
   for (int i = 1; i <= 1000; ++i)
     if (melon_fiber_start(fct, NULL + i))
       break;
+
   melon_wait();
   melon_mutex_destroy(mutex);
+  melon_deinit();
   return 0;
 }

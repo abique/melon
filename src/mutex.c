@@ -33,25 +33,18 @@ void melon_mutex_lock2(melon_fiber * fiber, melon_mutex * mutex)
   fiber->timer = 0;
   if (!mutex->owner)
   {
-    mutex->owner = fiber;
-    mutex->lock_count = fiber->lock_count; // for condition restoring the lock count
+    mutex->owner      = fiber;
+    mutex->lock_count = fiber->lock_count; // for cond_wait, restoring the lock count
     assert(mutex->lock_count == 1 || (mutex->lock_count > 1 && mutex->is_recursive));
     melon_spin_unlock(&mutex->lock);
+    melon_sched_ready(fiber);
     return;
-  }
-  else if (mutex->owner == fiber)
-  {
-    if (!mutex->is_recursive)
-      assert(0 && "logic error, relocking non-recursive mutex");
-    ++mutex->lock_count;
-    mutex->is_recursive = 1;
-    melon_spin_unlock(&mutex->lock);
   }
   else
   {
+    assert(mutex->owner != fiber);
     melon_dlist_push(mutex->lock_queue, fiber, );
     melon_spin_unlock(&mutex->lock);
-    melon_sched_next();
   }
 }
 
@@ -62,7 +55,32 @@ void melon_mutex_lock(struct melon_mutex * mutex)
   self->lock_count   = 1; // Initialise the lock count, see melon_cond_wait
                           // to understand. Not used while relocking recursive
                           // mutex.
-  melon_mutex_lock2(self, mutex);
+  assert(mutex);
+  melon_spin_lock(&mutex->lock);
+  self->timer = 0;
+  if (!mutex->owner)
+  {
+    mutex->owner = self;
+    mutex->lock_count = 1; // for condition restoring the lock count
+    melon_spin_unlock(&mutex->lock);
+    return;
+  }
+  else if (mutex->owner == self)
+  {
+    if (!mutex->is_recursive)
+    {
+      assert(0 && "logic error, relocking non-recursive mutex");
+      mutex->is_recursive = 1;
+    }
+    ++mutex->lock_count;
+    melon_spin_unlock(&mutex->lock);
+  }
+  else
+  {
+    melon_dlist_push(mutex->lock_queue, self, );
+    melon_spin_unlock(&mutex->lock);
+    melon_sched_next();
+  }
 }
 
 void melon_mutex_unlock(struct melon_mutex * mutex)

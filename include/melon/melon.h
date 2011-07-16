@@ -115,20 +115,6 @@ extern "C" {
 
   /** @} */
 
-# define MELON_MAIN(Argc, Argv)                 \
-  int melon_main(int argc, char ** argv);       \
-  int main(int argc, char ** argv)              \
-  {                                             \
-    if (melon_init(0))                          \
-      return 1;                                 \
-    int ret = melon_main(argc, argv);           \
-    melon_wait();                               \
-    melon_deinit();                             \
-    return ret;                                 \
-  }                                             \
-  int melon_main(int Argc, char ** Argv)
-
-
 # ifdef MELON_OVERRIDE_POSIX
 
 #  ifdef sleep
@@ -143,23 +129,23 @@ extern "C" {
 
 /*
 
-for func in \
-write pwrite writev prwitev \
-read pread readv preadv \
-connect accept \
-sendto sendmsg recvfrom recvmsg \
-splice
-do
-cat <<EOF
-#  ifdef $func
-#   undef $func
-#  endif
-#  define $func(Args...) melon_$func(Args, 0)
+  for func in \
+  write pwrite writev prwitev \
+  read pread readv preadv \
+  connect accept \
+  sendto sendmsg recvfrom recvmsg \
+  splice
+  do
+  cat <<EOF
+  #  ifdef $func
+  #   undef $func
+  #  endif
+  #  define $func(Args...) melon_$func(Args, 0)
 
-EOF
-done
+  EOF
+  done
 
- */
+*/
 
 #  ifdef write
 #   undef write

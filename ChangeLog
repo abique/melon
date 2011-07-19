@@ -1,5 +1,6 @@
 2011-07-19  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.5.0
 	* io.c: added a new file to wrap C io.
 	* fiber.c: added melon_fiber_name() and melon_fiber_setname()
 	* release: 0.4.0

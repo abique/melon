@@ -5,36 +5,54 @@
    CLOSED: [2011-07-10 Sun 12:34]
 ** DONE mutex_lock/mutex_unlock
    CLOSED: [2011-07-19 Tue 16:07]
-** TODO rw mutex
 ** DONE cond_wait/cond_notify*
    CLOSED: [2011-07-16 Sat 13:40]
-** TODO semaphore
 ** DONE timer manager
    CLOSED: [2011-07-14 Thu 11:37]
-** TODO io manager
+** DONE io manager
+   CLOSED: [2011-07-20 Wed 00:17]
 ** DONE scheduler
    CLOSED: [2011-07-09 Sat 23:01]
 
+** TODO semaphore
+** TODO rw mutex
 * POSIX interfaces
-** TODO melon_sleep()
-** TODO melon_usleep()
-** TODO melon_write()
-** TODO melon_pwrite()
-** TODO melon_writev()
-** TODO melon_pwritev()
-** TODO melon_read()
-** TODO melon_pread()
-** TODO melon_readv()
-** TODO melon_preadv()
-** TODO melon_connect()
-** TODO melon_accept()
-** TODO melon_sendto()
-** TODO melon_recvfrom()
-** TODO melon_recvmsg()
-** TODO melon_sendmsg()
+** DONE melon_sleep()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_usleep()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_write()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_pwrite()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_writev()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_pwritev()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_read()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_pread()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_readv()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_preadv()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_connect()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_accept()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_sendto()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_recvfrom()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_recvmsg()
+   CLOSED: [2011-07-20 Wed 00:17]
+** DONE melon_sendmsg()
+   CLOSED: [2011-07-20 Wed 00:17]
 
 * Linux interfaces
-** TODO sendfile/splice/tee/vmsplice
+** DONE sendfile/splice/tee/vmsplice
+   CLOSED: [2011-07-20 Wed 00:17]
 
 * Test suite
 ** DONE find the test framework
@@ -49,5 +67,7 @@
    CLOSED: [2011-07-16 Sat 13:40]
 ** DONE test cond_wait/cond_notify*
    CLOSED: [2011-07-19 Tue 16:07]
+** DONE test io
+   CLOSED: [2011-07-20 Wed 00:18]
 ** TODO test rw mutex
 ** TODO test semaphore

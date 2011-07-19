@@ -17,9 +17,18 @@ int melon_init(uint16_t nb_threads)
   g_melon.fibers_count = 0;
   g_melon.ready = NULL;
 
-  /* init the mutex */
-  if (pthread_mutex_init(&g_melon.lock, NULL))
+  pthread_mutexattr_t mutex_attr;
+  if (pthread_mutexattr_init(&mutex_attr))
     return -1;
+
+  if (pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE))
+    goto failure_mutex;
+
+  /* init the mutex */
+  if (pthread_mutex_init(&g_melon.lock, &mutex_attr))
+    goto failure_mutex;
+
+  pthread_mutexattr_destroy(&mutex_attr);
 
   if (pthread_cond_init(&g_melon.ready_cond, NULL))
     goto failure_cond;
@@ -51,7 +60,7 @@ int melon_init(uint16_t nb_threads)
 
   /* initialize timer manager */
   if (melon_timer_manager_init())
-      goto failure_timer_manager;
+    goto failure_timer_manager;
 
   /* allocates thread pool */
   g_melon.threads = malloc(sizeof (*g_melon.threads) * g_melon.threads_nb);
@@ -87,6 +96,9 @@ int melon_init(uint16_t nb_threads)
 
   failure_cond:
   pthread_mutex_destroy(&g_melon.lock);
+
+  failure_mutex:
+  pthread_mutexattr_destroy(&mutex_attr);
   return -1;
 }
 

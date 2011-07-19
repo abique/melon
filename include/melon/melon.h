@@ -30,6 +30,8 @@ extern "C" {
    * @return 0 on success */
   int melon_fiber_start(void (*fct)(void *), void * ctx);
   struct melon_fiber * melon_fiber_self(void);
+  const char * melon_fiber_name(void);
+  void melon_fiber_setname(const char * name);
 
   /** schedules next fibers and put the current one in the back
    * of the ready queue */

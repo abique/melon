@@ -84,3 +84,13 @@ int melon_fiber_start(void (*fct)(void *), void * ctx)
   melon_sched_ready(fiber);
   return 0;
 }
+
+const char * melon_fiber_name(void)
+{
+  return g_current_fiber->name;
+}
+
+void melon_fiber_setname(const char * name)
+{
+  g_current_fiber->name = name;
+}

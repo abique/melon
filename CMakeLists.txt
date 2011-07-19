@@ -64,3 +64,6 @@ add_test(cond_broadcast cond_broadcast)
 
 test_exec(cond_timedwait tests/cond_timedwait.c)
 add_test(cond_timedwait cond_timedwait)
+
+test_exec(io tests/io.c)
+add_test(io io)

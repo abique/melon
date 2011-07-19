@@ -47,6 +47,7 @@ extern "C" {
   typedef struct melon_mutex melon_mutex;
   typedef struct melon_rwlock melon_rwlock;
   typedef struct melon_cond melon_cond;
+  typedef struct melon_sem melon_sem;
 
   melon_mutex * melon_mutex_new(void);
   void melon_mutex_destroy(melon_mutex * mutex);
@@ -71,6 +72,13 @@ extern "C" {
   int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
   void melon_cond_signal(melon_cond * condition);
   void melon_cond_broadcast(melon_cond * condition);
+
+  melon_sem * melon_sem_new(int nb);
+  void melon_sem_destroy(melon_sem * sem);
+  void melon_sem_acquire(int nb);
+  void melon_sem_release(int nb);
+  int melon_sem_tryacquire(int nb);
+  int melon_sem_timedacquire(int nb);
   /** @} */
 
   /**

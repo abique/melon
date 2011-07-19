@@ -55,8 +55,11 @@ add_test(melon_sleep melon_sleep)
 test_exec(mutex_simple tests/mutex_simple.c)
 add_test(mutex_simple mutex_simple)
 
-test_exec(cond_1 tests/cond_1.c)
-add_test(cond_1 tests/cond_1.c)
+test_exec(cond_signal tests/cond_signal.c)
+add_test(cond_signal cond_signal)
 
-test_exec(cond_2 tests/cond_2.c)
-add_test(cond_2 tests/cond_2.c)
+test_exec(cond_broadcast tests/cond_broadcast.c)
+add_test(cond_broadcast cond_broadcast)
+
+test_exec(cond_timedwait tests/cond_timedwait.c)
+add_test(cond_timedwait cond_timedwait)

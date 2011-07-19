@@ -1,17 +1,12 @@
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
 #include "private.h"
-
-#define IMPLEMENT_IO(Event, Type, Name, Args...)                \
-  Type melon_##Name(Args)                                       \
-  {                                                             \
-    int ret = melon_io_manager_waitfor(fildes, Event, timeout); \
-    if (ret)                                                    \
-      return -1;                                                \
-    return Name(Args);                                          \
-  }
 
 ssize_t melon_write(int fildes, const void * data, size_t nbyte, melon_time_t timeout)
 {
@@ -129,4 +124,31 @@ ssize_t melon_sendfile(int out_fd, int in_fd, off_t *offset, size_t count, melon
   if (melon_io_manager_waitfor(out_fd, kEventIoWrite, timeout))
     return -1;
   return sendfile(out_fd, in_fd, offset, count);
+}
+
+ssize_t melon_splice(int fd_in, loff_t *off_in, int fd_out,
+                     loff_t *off_out, size_t len, unsigned int flags, melon_time_t timeout)
+{
+  if (melon_io_manager_waitfor(fd_in, kEventIoRead, timeout))
+    return -1;
+  if (melon_io_manager_waitfor(fd_out, kEventIoWrite, timeout))
+    return -1;
+  return splice(fd_in, off_in, fd_out, off_out, len, flags);
+}
+
+ssize_t melon_tee(int fd_in, int fd_out, size_t len, unsigned int flags, melon_time_t timeout)
+{
+  if (melon_io_manager_waitfor(fd_in, kEventIoRead, timeout))
+    return -1;
+  if (melon_io_manager_waitfor(fd_out, kEventIoWrite, timeout))
+    return -1;
+  return tee(fd_in, fd_out, len, flags);
+}
+
+ssize_t melon_vmsplice(int fd, const struct iovec *iov,
+                       unsigned long nr_segs, unsigned int flags, melon_time_t timeout)
+{
+  if (melon_io_manager_waitfor(fd, kEventIoRead, timeout))
+    return -1;
+  return vmsplice(fd, iov, nr_segs, flags);
 }

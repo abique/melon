@@ -15,11 +15,11 @@ extern "C" {
 
   typedef enum MelonEvent
   {
-    kEventNone,
-    kEventIoRead,
-    kEventIoWrite,
-    kEventDestroy,
-    kEventTimer,
+    kEventNone = 0x0,
+    kEventIoRead = 0x1,
+    kEventIoWrite = 0x2,
+    kEventDestroy = 0x4,
+    kEventTimer = 0x8,
   } MelonEvent;
 
   /* enum MelonFiberState */
@@ -146,6 +146,7 @@ extern "C" {
   int melon_io_manager_init(void);
   void * melon_io_manager_loop(void *);
   void melon_io_manager_deinit(void);
+  int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout);
 
   /** @return 0 on success */
   int melon_timer_manager_init(void);

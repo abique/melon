@@ -9,6 +9,7 @@ add_definitions(-D_GNU_SOURCE -std=c99 -Wall -Wextra)
 add_library(melon
   src/cond.c
   src/fiber.c
+  src/io.c
   src/io_manager.c
   src/melon.c
   src/mutex.c

@@ -63,7 +63,6 @@ void * melon_io_manager_loop(void * dummy)
     ret = pthread_mutex_unlock(&g_melon.lock);
     assert(!ret);
   }
-  puts("io manager initialized");
   return 0;
 }
 

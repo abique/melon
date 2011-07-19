@@ -90,38 +90,36 @@ extern "C" {
   unsigned int melon_sleep(uint32_t secs);
   int melon_usleep(uint64_t usecs);
 
-  ssize_t melon_write(int fildes, const void * data, size_t nbyte, uint64_t timeout);
-  ssize_t melon_pwrite(int fildes, const void * data, size_t nbyte, off_t offset, uint64_t timeout);
-  ssize_t melon_writev(int fildes, const struct iovec *iov, int iovcnt, uint64_t timeout);
-  ssize_t melon_pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset, uint64_t timeout);
+  ssize_t melon_write(int fildes, const void * data, size_t nbyte, melon_time_t timeout);
+  ssize_t melon_pwrite(int fildes, const void * data, size_t nbyte, off_t offset, melon_time_t timeout);
+  ssize_t melon_writev(int fildes, const struct iovec *iov, int iovcnt, melon_time_t timeout);
+  ssize_t melon_pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset, melon_time_t timeout);
 
-  ssize_t melon_read(int fildes, void * data, size_t nbyte, uint64_t timeout);
-  ssize_t melon_pread(int fildes, void * data, size_t nbyte, off_t offset, uint64_t timeout);
-  ssize_t melon_readv(int fildes, const struct iovec *iov, int iovcnt, uint64_t timeout);
-  ssize_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset, uint64_t timeout);
+  ssize_t melon_read(int fildes, void * data, size_t nbyte, melon_time_t timeout);
+  ssize_t melon_pread(int fildes, void * data, size_t nbyte, off_t offset, melon_time_t timeout);
+  ssize_t melon_readv(int fildes, const struct iovec *iov, int iovcnt, melon_time_t timeout);
+  ssize_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset, melon_time_t timeout);
 
-  int melon_connect(int socket, const struct sockaddr *address, uint64_t timeout);
-  int melon_accept(int socket, struct sockaddr * restrict address, socklen_t * restrict address_len, uint64_t timeout);
+  int melon_connect(int socket, const struct sockaddr *address, socklen_t address_len, melon_time_t timeout);
+  int melon_accept(int socket, struct sockaddr * restrict address, socklen_t * restrict address_len, melon_time_t timeout);
   ssize_t melon_sendto(int socket, const void *message, size_t length,
                        int flags, const struct sockaddr *dest_addr,
-                       socklen_t dest_len, uint64_t timeout);
+                       socklen_t dest_len, melon_time_t timeout);
   ssize_t melon_recvfrom(int socket, void *restrict buffer, size_t length,
                          int flags, struct sockaddr * address,
-                         socklen_t * address_len, uint64_t timeout);
-  ssize_t melon_recvmsg(int socket, struct msghdr *message, int flags, uint64_t timeout);
-  ssize_t melon_sendmsg(int socket, const struct msghdr *message, int flags);
+                         socklen_t * address_len, melon_time_t timeout);
+  ssize_t melon_recvmsg(int socket, struct msghdr *message, int flags, melon_time_t timeout);
+  ssize_t melon_sendmsg(int socket, const struct msghdr *message, int flags, melon_time_t timeout);
 
-# if 0
-  ssize_t melon_sendfile(int out_fd, int in_fd, off_t *offset, size_t count, uint64_t timeout);
+  ssize_t melon_sendfile(int out_fd, int in_fd, off_t *offset, size_t count, melon_time_t timeout);
 
 #  ifdef _GNU_SOURCE
   ssize_t melon_splice(int fd_in, loff_t *off_in, int fd_out,
-                       loff_t *off_out, size_t len, unsigned int flags, uint64_t timeout);
-  ssize_t melon_tee(int fd_in, int fd_out, size_t len, unsigned int flags, uint64_t timeout);
+                       loff_t *off_out, size_t len, unsigned int flags, melon_time_t timeout);
+  ssize_t melon_tee(int fd_in, int fd_out, size_t len, unsigned int flags, melon_time_t timeout);
   ssize_t melon_vmsplice(int fd, const struct iovec *iov,
-                         unsigned long nr_segs, unsigned int flags, uint64_t timeout);
+                         unsigned long nr_segs, unsigned int flags, melon_time_t timeout);
 #  endif
-# endif /* later */
 
   /** @} */
 

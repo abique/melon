@@ -14,7 +14,8 @@
 ** DONE scheduler
    CLOSED: [2011-07-09 Sat 23:01]
 
-** TODO semaphore
+** DONE semaphore
+   CLOSED: [2011-07-20 Wed 00:55]
 ** TODO rw mutex
 * POSIX interfaces
 ** DONE melon_sleep()

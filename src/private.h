@@ -61,6 +61,15 @@ extern "C" {
     melon_fiber *  wait_queue;
   };
 
+  struct melon_sem
+  {
+    melon_mutex * lock;
+    melon_cond  * cond;
+    int           left;
+    int           nb; // sanity check
+    melon_fiber * queue;
+  };
+
   struct melon_fiber
   {
     melon_spinlock lock; // locked while running the fiber so it can't be ran two times
@@ -91,6 +100,9 @@ extern "C" {
 
     /* restore the lock count on cond_signal() */
     int                  lock_count;
+
+    /* the semaphore nb res to acquire */
+    int                  sem_nb;
   };
 
   typedef struct melon

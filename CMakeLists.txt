@@ -16,6 +16,7 @@ add_library(melon
   src/sched.c
   src/stack_alloc.c
   src/timer_manager.c
+  src/sem.c
 )
 target_link_libraries(melon pthread rt)
 

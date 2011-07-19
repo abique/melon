@@ -77,10 +77,10 @@ extern "C" {
 
   melon_sem * melon_sem_new(int nb);
   void melon_sem_destroy(melon_sem * sem);
-  void melon_sem_acquire(int nb);
-  void melon_sem_release(int nb);
-  int melon_sem_tryacquire(int nb);
-  int melon_sem_timedacquire(int nb);
+  void melon_sem_acquire(melon_sem * sem, int nb);
+  void melon_sem_release(melon_sem * sem, int nb);
+  int melon_sem_tryacquire(melon_sem * sem, int nb);
+  int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout);
   /** @} */
 
   /**

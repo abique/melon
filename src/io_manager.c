@@ -18,7 +18,7 @@ static void melon_io_manager_handle(struct epoll_event * event)
   melon_fiber * curr = g_melon.io_blocked[event->data.fd];
   melon_fiber * next = NULL;
 
-  while (curr)
+  for (; curr; curr = next)
   {
     if (curr->next == curr ||
         curr->next == g_melon.io_blocked[event->data.fd])
@@ -91,6 +91,7 @@ static void waitfor_cb(struct waitfor_ctx * ctx)
 {
   ctx->timeout = 1;
   melon_dlist_unlink(g_melon.io_blocked[ctx->fildes], ctx->fiber, );
+  melon_sched_ready_locked(ctx->fiber);
 }
 
 int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout)
@@ -102,6 +103,13 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
   pthread_mutex_lock(&g_melon.lock);
   self->waited_event = waited_events;
   melon_dlist_push(g_melon.io_blocked[fildes], self, );
+
+  struct epoll_event ep_event;
+  ep_event.events = (waited_events & kEventIoRead ? EPOLLIN : 0) |
+    (waited_events & kEventIoWrite ? EPOLLOUT : 0) |
+    EPOLLONESHOT;
+  ep_event.data.fd = fildes;
+  epoll_ctl(g_melon.epoll_fd, EPOLL_CTL_ADD, fildes, &ep_event);
   if (timeout > 0)
   {
     ctx.fiber       = self;
@@ -111,6 +119,10 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
     self->timer_ctx = &ctx;
     self->timer_cb  = (melon_callback)waitfor_cb;
     melon_timer_push_locked();
+  }
+  else
+  {
+    self->timer = 0;
   }
   pthread_mutex_unlock(&g_melon.lock);
   melon_sched_next();

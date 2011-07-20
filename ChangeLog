@@ -1,5 +1,6 @@
 2011-07-20  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* rwlock.c: implemented rwlock
 	* barrier.c: implemented a kind of dynamic barrier
 	* sem.c: implemented semaphore
 	* release: 0.5.0

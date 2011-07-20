@@ -46,10 +46,11 @@ extern "C" {
    * Synchronisation functions
    * @{
    */
-  typedef struct melon_mutex melon_mutex;
-  typedef struct melon_rwlock melon_rwlock;
-  typedef struct melon_cond melon_cond;
-  typedef struct melon_sem melon_sem;
+  typedef struct melon_mutex   melon_mutex;
+  typedef struct melon_rwlock  melon_rwlock;
+  typedef struct melon_cond    melon_cond;
+  typedef struct melon_sem     melon_sem;
+  typedef struct melon_barrier melon_barrier;
 
   melon_mutex * melon_mutex_new(void);
   void melon_mutex_destroy(melon_mutex * mutex);
@@ -81,6 +82,12 @@ extern "C" {
   void melon_sem_release(melon_sem * sem, int nb);
   int melon_sem_tryacquire(melon_sem * sem, int nb);
   int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout);
+
+  melon_barrier * melon_barrier_new();
+  void melon_barrier_destroy(melon_barrier * barrier);
+  void melon_barrier_use(melon_barrier * barrier);
+  void melon_barrier_release(melon_barrier * barrier);
+  void melon_barrier_wait(melon_barrier * barrier);
   /** @} */
 
   /**

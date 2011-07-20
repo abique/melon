@@ -7,6 +7,7 @@ enable_testing()
 add_definitions(-D_GNU_SOURCE -std=c99 -Wall -Wextra)
 
 add_library(melon
+  src/barrier.c
   src/cond.c
   src/fiber.c
   src/io.c
@@ -14,9 +15,9 @@ add_library(melon
   src/melon.c
   src/mutex.c
   src/sched.c
+  src/sem.c
   src/stack_alloc.c
   src/timer_manager.c
-  src/sem.c
 )
 target_link_libraries(melon pthread rt)
 

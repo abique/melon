@@ -17,6 +17,8 @@
 ** DONE semaphore
    CLOSED: [2011-07-20 Wed 00:55]
 ** TODO rw mutex
+** DONE barrier
+   CLOSED: [2011-07-20 Wed 12:12]
 * POSIX interfaces
 ** DONE melon_sleep()
    CLOSED: [2011-07-20 Wed 00:17]
@@ -72,3 +74,4 @@
    CLOSED: [2011-07-20 Wed 00:18]
 ** TODO test rw mutex
 ** TODO test semaphore
+** TODO test barrier

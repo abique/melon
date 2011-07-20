@@ -53,6 +53,11 @@ extern "C" {
 
   struct melon_rwmutex
   {
+    melon_mutex * lock;
+    melon_cond *  wcond;
+    melon_cond *  rcond;
+    int           lock_count;
+    melon_fiber * wowner;
   };
 
   struct melon_cond
@@ -68,6 +73,13 @@ extern "C" {
     int           left;
     int           nb; // sanity check
     melon_fiber * queue;
+  };
+
+  struct melon_barrier
+  {
+    melon_mutex * lock;
+    melon_cond *  cond;
+    int           count;
   };
 
   struct melon_fiber

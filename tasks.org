@@ -16,7 +16,8 @@
 
 ** DONE semaphore
    CLOSED: [2011-07-20 Wed 00:55]
-** TODO rw mutex
+** DONE rw mutex
+   CLOSED: [2011-07-20 Wed 13:02]
 ** DONE barrier
    CLOSED: [2011-07-20 Wed 12:12]
 * POSIX interfaces
@@ -75,3 +76,10 @@
 ** TODO test rw mutex
 ** TODO test semaphore
 ** TODO test barrier
+* Portability
+** TODO port to opensolaris/solaris/openindiana
+** TODO port to freebsd
+** TODO port to windows
+* Documentation
+** TODO make a doxyfile
+** TODO publish the documentation on the web

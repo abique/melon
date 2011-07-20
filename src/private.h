@@ -51,12 +51,13 @@ extern "C" {
     int            lock_count;
   };
 
-  struct melon_rwmutex
+  struct melon_rwlock
   {
     melon_mutex * lock;
     melon_cond *  wcond;
     melon_cond *  rcond;
     int           lock_count;
+    int           is_read;
     melon_fiber * wowner;
   };
 

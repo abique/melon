@@ -14,6 +14,7 @@ add_library(melon
   src/io_manager.c
   src/melon.c
   src/mutex.c
+  src/rwlock.c
   src/sched.c
   src/sem.c
   src/stack_alloc.c

@@ -93,7 +93,7 @@ extern "C" {
 
   melon_barrier * melon_barrier_new(uint16_t nb);
   void melon_barrier_destroy(melon_barrier * barrier);
-  void melon_barrier_use(melon_barrier * barrier, uint16_t nb);
+  void melon_barrier_add(melon_barrier * barrier, uint16_t nb);
   void melon_barrier_release(melon_barrier * barrier, uint16_t nb);
   void melon_barrier_wait(melon_barrier * barrier);
   /** @} */

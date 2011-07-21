@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
   int n = atoi(argv[1]);
   for (nb_created = 0; nb_created < n; ++nb_created)
   {
-    if (melon_fiber_start(dummy_fiber, NULL + nb_created))
+    if (melon_fiber_startlight(dummy_fiber, NULL + nb_created))
       break;
   }
 

@@ -44,7 +44,7 @@ static void melon_fiber_wrapper(void)
   assert(0 && "should never be reached");
 }
 
-int melon_fiber_start(void (*fct)(void *), void * ctx)
+int melon_fiber_startlight(void (*fct)(void *), void * ctx)
 {
   assert(fct);
 

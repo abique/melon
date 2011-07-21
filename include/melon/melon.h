@@ -28,7 +28,7 @@ extern "C" {
   typedef struct melon_fiber melon_fiber;
   /** creates a new fiber
    * @return 0 on success */
-  int melon_fiber_start(void (*fct)(void *), void * ctx);
+  int melon_fiber_startlight(void (*fct)(void *), void * ctx);
   struct melon_fiber * melon_fiber_self(void);
   const char * melon_fiber_name(void);
   void melon_fiber_setname(const char * name);

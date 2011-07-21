@@ -19,7 +19,7 @@ int main(void)
     return 1;
 
   for (int i = 1; i <= 100; ++i)
-    if (melon_fiber_start(timer, NULL + i))
+    if (melon_fiber_startlight(timer, NULL + i))
       break;
 
   melon_wait();

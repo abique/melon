@@ -32,7 +32,7 @@ static void fct1(void * dummy)
   (void)dummy;
   printf("fct1: xx\n");
   melon_mutex_lock(mutex);
-  melon_fiber_start(fct2, NULL);
+  melon_fiber_startlight(fct2, NULL);
   printf("fct1: cond timed wait\n");
   int ret = melon_cond_timedwait(cond, mutex, melon_time() + 1000 * 1000 * 100);
   printf("fct1: woke up, got val: %d\n", val);
@@ -48,7 +48,7 @@ int main(void)
     return 1;
   mutex = melon_mutex_new(0);
   cond = melon_cond_new();
-  melon_fiber_start(fct1, NULL);
+  melon_fiber_startlight(fct1, NULL);
   melon_wait();
   melon_mutex_destroy(mutex);
   melon_cond_destroy(cond);

@@ -24,7 +24,7 @@ namespace melon
   };
 
   template <typename T>
-  inline bool startFiber(void (*fct)(T *), T * ctx) { return !::melon_fiber_start((void(*)(void*))fct, (void*)ctx); }
+  inline bool startFiber(void (*fct)(T *), T * ctx) { return !::melon_fiber_startlight((void(*)(void*))fct, (void*)ctx); }
   inline void yield() { ::melon_yield(); }
   inline ::melon_time_t time() { return ::melon_time(); }
   inline ::melon_time_t nanoseconds(int64_t ns) { return ns; }

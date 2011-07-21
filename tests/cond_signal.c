@@ -37,7 +37,7 @@ int main(void)
 {
   if (melon_init(0))
     return 1;
-  mutex = melon_mutex_new();
+  mutex = melon_mutex_new(0);
   cond = melon_cond_new();
   melon_fiber_start(fct1, NULL);
   melon_wait();

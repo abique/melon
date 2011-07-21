@@ -8,7 +8,7 @@ melon_barrier * melon_barrier_new(uint16_t nb)
   melon_barrier * barrier = malloc(sizeof (*barrier));
   if (!barrier)
     return NULL;
-  barrier->lock = melon_mutex_new();
+  barrier->lock = melon_mutex_new(0);
   if (!barrier->lock)
     goto failure_mutex;
   barrier->cond = melon_cond_new();
@@ -35,7 +35,7 @@ void melon_barrier_destroy(melon_barrier * barrier)
   free(barrier);
 }
 
-void melon_barrier_use(melon_barrier * barrier, uint16_t nb)
+void melon_barrier_add(melon_barrier * barrier, uint16_t nb)
 {
   __sync_add_and_fetch(&barrier->count, nb);
 }

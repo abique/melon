@@ -10,7 +10,7 @@ melon_rwlock * melon_rwlock_new(void)
   if (!rwlock)
     goto failure_malloc;
 
-  rwlock->lock = melon_mutex_new();
+  rwlock->lock = melon_mutex_new(0);
   if (!rwlock->lock)
     goto failure_mutex;
   rwlock->wcond = melon_cond_new();

@@ -12,7 +12,7 @@ melon_sem * melon_sem_new(int nb)
   if (!sem)
     return NULL;
 
-  sem->lock = melon_mutex_new();
+  sem->lock = melon_mutex_new(0);
   if (!sem->lock)
     goto failure_mutex;
 

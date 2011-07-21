@@ -27,7 +27,7 @@ int main(void)
   if (melon_init(0))
     return 1;
 
-  mutex = melon_mutex_new();
+  mutex = melon_mutex_new(0);
   for (int i = 1; i <= 1000; ++i)
     if (melon_fiber_start(fct, NULL + i))
       break;

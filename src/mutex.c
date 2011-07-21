@@ -3,7 +3,7 @@
 #include <errno.h>
 #include "private.h"
 
-melon_mutex * melon_mutex_new(void)
+melon_mutex * melon_mutex_new(int is_recursive)
 {
   melon_mutex * mutex = malloc(sizeof (*mutex));
   if (!mutex)
@@ -11,7 +11,7 @@ melon_mutex * melon_mutex_new(void)
   melon_spin_init(&mutex->lock);
   mutex->owner        = NULL;
   mutex->lock_queue   = NULL;
-  mutex->is_recursive = 0;
+  mutex->is_recursive = is_recursive;
   mutex->lock_count   = 0;
   return mutex;
 }

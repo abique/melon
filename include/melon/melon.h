@@ -52,7 +52,7 @@ extern "C" {
   typedef struct melon_sem     melon_sem;
   typedef struct melon_barrier melon_barrier;
 
-  melon_mutex * melon_mutex_new(void);
+  melon_mutex * melon_mutex_new(int is_recursive);
   void melon_mutex_destroy(melon_mutex * mutex);
   void melon_mutex_lock(melon_mutex * mutex);
   void melon_mutex_unlock(melon_mutex * mutex);
@@ -79,9 +79,9 @@ extern "C" {
   melon_sem * melon_sem_new(int nb);
   void melon_sem_destroy(melon_sem * sem);
   void melon_sem_acquire(melon_sem * sem, int nb);
-  void melon_sem_release(melon_sem * sem, int nb);
   int melon_sem_tryacquire(melon_sem * sem, int nb);
   int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout);
+  void melon_sem_release(melon_sem * sem, int nb);
 
   melon_barrier * melon_barrier_new(uint16_t nb);
   void melon_barrier_destroy(melon_barrier * barrier);

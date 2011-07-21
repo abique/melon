@@ -12,7 +12,7 @@ namespace melon
     NonCopyable(const NonCopyable &);
   };
 
-  class Melon : public NonCopyable
+  class Melon : private NonCopyable
   {
   public:
     inline Melon(uint16_t nb_threads) { init_succeed = !::melon_init(nb_threads); }
@@ -36,7 +36,7 @@ namespace melon
   inline ::melon_time_t days(int64_t d) { return d * 24 * 60 * 60 * 1000 * 1000 * 1000; }
 
   template <typename T>
-  class Locker : public NonCopyable
+  class Locker : private NonCopyable
   {
   public:
     inline ScopedLocker(T & mutex) : mutex_(mutex) { mutex.lock(); }
@@ -46,7 +46,7 @@ namespace melon
   };
 
   template <typename T>
-  class UniqueLocker : public NonCopyable
+  class UniqueLocker : private NonCopyable
   {
   public:
     inline UniqueLocker(T & mutex, bool acquire = true)
@@ -68,7 +68,7 @@ namespace melon
     T &  mutex_;
   };
 
-  class Mutex : public NonCopyable
+  class Mutex : private NonCopyable
   {
   public:
     typedef Locker<Mutex> Locker;
@@ -86,7 +86,7 @@ namespace melon
   };
 
   template <typename T>
-  class RwLocker
+  class RwLocker : private NonCopyable
   {
   public:
     enum State { kUnlocked, kReadLocked, kWriteLocked };
@@ -138,7 +138,7 @@ namespace melon
   void sleep(::melon_time_t time);
 
   template <typename T, typename QueueType = std::queue<T>>
-  class Channel
+    class Channel : private NonCopyable
   {
   public:
     inline Channel()

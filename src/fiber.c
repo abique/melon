@@ -88,6 +88,7 @@ static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
   fiber->sem_nb           = 0;
   fiber->join_retval      = NULL;
   fiber->join_is_detached = 0;
+  fiber->join_is_finished = 0;
   fiber->join_mutex       = NULL;
   fiber->join_cond        = NULL;
   melon_spin_init(&fiber->lock);

@@ -14,7 +14,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td>pthread_t</td>
-<td>melon_fiber *</td>
+<td>\ref melon_fiber *</td>
 <td></td>
 </tr>
 <tr>
@@ -59,7 +59,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td>pthread_mutex_t *</td>
-<td>melon_mutex *</td>
+<td>\ref melon_mutex *</td>
 <td></td>
 </tr>
 <tr>
@@ -99,7 +99,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td>pthread_rwlock_t *</td>
-<td>melon_rwlock *</td>
+<td>\ref melon_rwlock *</td>
 <td></td>
 </tr>
 <tr>
@@ -154,7 +154,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td>pthread_cond_t *</td>
-<td>melon_cond *</td>
+<td>\ref melon_cond *</td>
 <td></td>
 </tr>
 <tr>
@@ -194,7 +194,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td>pthread_barrier_t *</td>
-<td>melon_barrier *</td>
+<td>\ref melon_barrier *</td>
 <td></td>
 </tr>
 <tr>
@@ -229,7 +229,7 @@ So you can easily try to replace pthreads by melon in your software.
 <table>
 <tr>
 <td></td>
-<td>melon_sem *</td>
+<td>\ref melon_sem *</td>
 <td></td>
 </tr>
 <tr>

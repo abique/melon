@@ -27,7 +27,7 @@ melon_barrier * melon_barrier_new()
 void melon_barrier_destroy(melon_barrier * barrier)
 {
   melon_mutex_lock(barrier->lock);
-  assert(barrier->count == 0);
+  //assert(barrier->count == 0);
   melon_mutex_unlock(barrier->lock);
 
   melon_cond_destroy(barrier->cond);

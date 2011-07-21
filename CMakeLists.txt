@@ -70,3 +70,6 @@ add_test(cond_timedwait cond_timedwait)
 
 test_exec(io tests/io.c)
 add_test(io io)
+
+test_exec(barrier tests/barrier.c)
+add_test(barrier barrier)

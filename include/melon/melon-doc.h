@@ -4,12 +4,23 @@
 
 @section WhatIs What is melon
 
+Melon is a M:N multithreading fiber implementation. It includes transparent I/O reactor,
+using the best poller available (epoll, kqueue or iocp). Timeouts are part of the
+library for I/O and synchronisation functions.
+For exemple read(int fd, void * data, size_t size, melon_time_t timeout).
+
+@section Why Why ?
+
 @section APIS The C API and the C++ binding
 
 @subsection APIC The C API, POSIX like
 
 The C API has been done to match posix as close as possible.
 So you can easily try to replace pthreads by melon in your software.
+
+@subsubsection Initialisation
+
+@subsubsection APIMATCH Correspondance between POSIX and melon
 
 <table>
 <tr>

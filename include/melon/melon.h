@@ -14,6 +14,13 @@
 extern "C" {
 # endif
 
+  typedef struct melon_mutex   melon_mutex;
+  typedef struct melon_rwlock  melon_rwlock;
+  typedef struct melon_cond    melon_cond;
+  typedef struct melon_sem     melon_sem;
+  typedef struct melon_barrier melon_barrier;
+  typedef int64_t              melon_time_t;
+
   /**
    * Melon runtime
    * @{
@@ -26,10 +33,18 @@ extern "C" {
   void melon_deinit(void);
 
   typedef struct melon_fiber melon_fiber;
-  /** creates a new fiber
+  /** creates a new detached fiber
    * @return 0 on success */
   int melon_fiber_startlight(void (*fct)(void *), void * ctx);
-  struct melon_fiber * melon_fiber_self(void);
+
+  /** if you don't need to join the fiber, prefer \ref melon_fiber_startlight
+   * which is faster */
+  melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
+  void melon_fiber_join(melon_fiber * fiber);
+  int melon_fiber_tryjoin(melon_fiber * fiber);
+  int melon_fiber_timedjoin(melon_fiber * fiber, melon_time_t timeout);
+  void melon_fiber_detach(melon_fiber * fiber);
+  melon_fiber * melon_fiber_self(void);
   const char * melon_fiber_name(void);
   void melon_fiber_setname(const char * name);
 
@@ -37,7 +52,6 @@ extern "C" {
    * of the ready queue */
   void melon_yield(void);
 
-  typedef int64_t melon_time_t;
   /** gets the time in nanoseconds */
   melon_time_t melon_time(void);
   /** @} */
@@ -46,12 +60,6 @@ extern "C" {
    * Synchronisation functions
    * @{
    */
-  typedef struct melon_mutex   melon_mutex;
-  typedef struct melon_rwlock  melon_rwlock;
-  typedef struct melon_cond    melon_cond;
-  typedef struct melon_sem     melon_sem;
-  typedef struct melon_barrier melon_barrier;
-
   melon_mutex * melon_mutex_new(int is_recursive);
   void melon_mutex_destroy(melon_mutex * mutex);
   void melon_mutex_lock(melon_mutex * mutex);

@@ -9,7 +9,7 @@ melon_mutex * mutex = NULL;
 melon_cond * cond = NULL;
 int val = 0;
 
-static void fct2(void * dummy)
+static void * fct2(void * dummy)
 {
   (void)dummy;
   melon_mutex_lock(mutex);
@@ -19,9 +19,10 @@ static void fct2(void * dummy)
   printf("fct2: sent signal\n");
   melon_mutex_unlock(mutex);
   printf("fct2: released mutex\n");
+  return NULL;
 }
 
-static void fct1(void * dummy)
+static void * fct1(void * dummy)
 {
   (void)dummy;
   printf("fct1: xx\n");
@@ -31,6 +32,7 @@ static void fct1(void * dummy)
   melon_cond_wait(cond, mutex);
   printf("fct1: woke up, got val: %d\n", val);
   melon_mutex_unlock(mutex);
+  return NULL;
 }
 
 int main(void)

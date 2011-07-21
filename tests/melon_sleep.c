@@ -5,12 +5,13 @@
 
 #include "../src/melon.h"
 
-static void timer(void * dummy)
+static void * timer(void * dummy)
 {
   (void)dummy;
   for (int i = 0; i < 20; ++i)
     melon_usleep((rand() % 5) * 10000);
   melon_sleep(2);
+  return NULL;
 }
 
 int main(void)

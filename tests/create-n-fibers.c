@@ -5,9 +5,10 @@
 
 #include "../src/melon.h"
 
-static void dummy_fiber(void * dummy)
+static void * dummy_fiber(void * dummy)
 {
   (void)dummy;
+  return NULL;
 }
 
 int nb_created = 0;

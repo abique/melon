@@ -8,14 +8,15 @@
 
 melon_barrier * barrier = NULL;
 
-static void fct2(void * dummy)
+static void * fct2(void * dummy)
 {
   printf("%p: wait\n", dummy);
   melon_barrier_wait(barrier);
   printf("%p: end\n", dummy);
+  return NULL;
 }
 
-static void fct1(void * dummy)
+static void * fct1(void * dummy)
 {
   (void)dummy;
 
@@ -31,6 +32,7 @@ static void fct1(void * dummy)
   melon_barrier_wait(barrier);
   printf("destroy()\n");
   melon_barrier_destroy(barrier);
+  return NULL;
 }
 
 int main(void)

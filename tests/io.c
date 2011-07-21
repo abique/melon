@@ -11,7 +11,7 @@ int fd[2];
 
 #define STR "Hello World!\n"
 
-static void fct2(void * dummy)
+static void * fct2(void * dummy)
 {
   (void)dummy;
 
@@ -28,9 +28,10 @@ static void fct2(void * dummy)
   printf("fct2: close\n");
   close(fd[0]);
   printf("fct2: end\n");
+  return NULL;
 }
 
-static void fct1(void * dummy)
+static void * fct1(void * dummy)
 {
   (void)dummy;
   printf("fct1: sleep\n");
@@ -40,6 +41,7 @@ static void fct1(void * dummy)
   printf("fct1: close\n");
   close(fd[1]);
   printf("fct1: end\n");
+  return NULL;
 }
 
 int main(void)

@@ -8,7 +8,7 @@
 melon_mutex * mutex = NULL;
 int nb = 0;
 
-static void fct(void * dummy)
+static void * fct(void * dummy)
 {
   (void)dummy;
   for (int i = 0; i < 1000; ++i)
@@ -20,6 +20,7 @@ static void fct(void * dummy)
     melon_mutex_unlock(mutex);
   }
   printf("%p finished\n", dummy);
+  return NULL;
 }
 
 int main(void)

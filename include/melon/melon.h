@@ -83,10 +83,10 @@ extern "C" {
   int melon_sem_tryacquire(melon_sem * sem, int nb);
   int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout);
 
-  melon_barrier * melon_barrier_new();
+  melon_barrier * melon_barrier_new(uint16_t nb);
   void melon_barrier_destroy(melon_barrier * barrier);
-  void melon_barrier_use(melon_barrier * barrier);
-  void melon_barrier_release(melon_barrier * barrier);
+  void melon_barrier_use(melon_barrier * barrier, uint16_t nb);
+  void melon_barrier_release(melon_barrier * barrier, uint16_t nb);
   void melon_barrier_wait(melon_barrier * barrier);
   /** @} */
 

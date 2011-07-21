@@ -20,15 +20,11 @@ static void fct1(void * dummy)
   (void)dummy;
 
   printf("barrier_new()\n");
-  barrier = melon_barrier_new();
+  barrier = melon_barrier_new(11);
   assert(barrier);
 
-  melon_barrier_use(barrier);
   for (int i = 1; i <= 10; ++i)
-  {
-    melon_barrier_use(barrier);
     melon_fiber_start(fct2, NULL + i);
-  }
   printf("slee(1)\n");
   melon_sleep(1);
   printf("wait()\n");

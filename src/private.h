@@ -90,11 +90,10 @@ extern "C" {
     melon_fiber *  prev;
     ucontext_t     ctx;
     MelonEvent     waited_event;
-    int            is_detached;
     const char *   name;
 
     /* start callback */
-    melon_callback start_cb;
+    void *         (*start_cb)(void *);
     void *         start_ctx;
 
     /* timer stuff */
@@ -116,6 +115,13 @@ extern "C" {
 
     /* the semaphore nb res to acquire */
     int                  sem_nb;
+
+    /* join stuff */
+    void *               join_retval;
+    melon_mutex *        join_mutex;
+    melon_cond *         join_cond;
+    int                  join_is_detached;
+    int                  join_is_finished;
   };
 
   typedef struct melon

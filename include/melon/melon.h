@@ -14,12 +14,13 @@
 extern "C" {
 # endif
 
+  typedef int64_t              melon_time_t;
   typedef struct melon_mutex   melon_mutex;
   typedef struct melon_rwlock  melon_rwlock;
   typedef struct melon_cond    melon_cond;
   typedef struct melon_sem     melon_sem;
   typedef struct melon_barrier melon_barrier;
-  typedef int64_t              melon_time_t;
+  typedef struct melon_fiber   melon_fiber;
 
   /**
    * Melon runtime
@@ -32,21 +33,20 @@ extern "C" {
   void melon_wait(void);
   void melon_deinit(void);
 
-  typedef struct melon_fiber melon_fiber;
   /** creates a new detached fiber
    * @return 0 on success */
-  int melon_fiber_startlight(void (*fct)(void *), void * ctx);
+  int melon_fiber_startlight(void * (*fct)(void *), void * ctx);
 
   /** if you don't need to join the fiber, prefer \ref melon_fiber_startlight
    * which is faster */
-  melon_fiber * melon_fiber_start(void (*fct)(void *), void * ctx);
-  void melon_fiber_join(melon_fiber * fiber);
-  int melon_fiber_tryjoin(melon_fiber * fiber);
-  int melon_fiber_timedjoin(melon_fiber * fiber, melon_time_t timeout);
+  melon_fiber * melon_fiber_start(void * (*fct)(void *), void * ctx);
+  void melon_fiber_join(melon_fiber * fiber, void ** retval);
+  int melon_fiber_tryjoin(melon_fiber * fiber, void ** retval);
+  int melon_fiber_timedjoin(melon_fiber * fiber, void ** retval, melon_time_t timeout);
   void melon_fiber_detach(melon_fiber * fiber);
   melon_fiber * melon_fiber_self(void);
-  const char * melon_fiber_name(void);
-  void melon_fiber_setname(const char * name);
+  const char * melon_fiber_name(const melon_fiber * fiber);
+  void melon_fiber_setname(melon_fiber * fiber, const char * name);
 
   /** schedules next fibers and put the current one in the back
    * of the ready queue */

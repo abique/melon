@@ -38,6 +38,16 @@ So you can easily try to replace pthreads by melon in your software.
 <td></td>
 </tr>
 <tr>
+<td>pthread_tryjoin_np</td>
+<td>\ref melon_fiber_tryjoin</td>
+<td></td>
+</tr>
+<tr>
+<td>pthread_timedjoin_np</td>
+<td>\ref melon_fiber_timedjoin</td>
+<td></td>
+</tr>
+<tr>
 <td>pthread_self</td>
 <td>\ref melon_fiber_self</td>
 <td></td>

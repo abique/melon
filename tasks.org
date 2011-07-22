@@ -77,6 +77,7 @@
 ** TODO test semaphore
 ** DONE test barrier
    CLOSED: [2011-07-22 Fri 16:01]
+** TODO test fiber_join/fiber_detach/...
 * Portability
 ** TODO port to opensolaris/solaris/openindiana
 ** TODO port to freebsd

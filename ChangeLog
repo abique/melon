@@ -1,5 +1,6 @@
 2011-07-22  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.6.0
 	* doc: wrote some doxygen docs
 	* c++: moved the c++ binding to a new library called mimosa
 

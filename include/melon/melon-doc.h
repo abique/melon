@@ -46,28 +46,7 @@ So you can easily try to replace pthreads by melon in your software.
 @subsection Initialisation
 
 Before being able to use melon, you have to initialise it.
-@code
-#include <melon/melon.h>
-
-void * my_fiber(void * ctx)
-{
-  // do what you want
-}
-
-int main(int argc, char ** argv)
-{
-  if (melon_init(0)) // initialises melon, and use the default number of kernel threads
-    return 1;
-
-  melon_fiber_startlight(my_fiber, NULL); // creates at least one fiber
-  // you can't use join/detach/lock/... from the main thread, you must be doing it
-  // in a fiber thread.
-
-  melon_wait(); // waits for every fibers to terminate
-  melon_deinit();
-  return 0;
-}
-@endcode
+@include tests/doc-sample.c
 
 @subsection APIMATCH Correspondance between POSIX and melon
 

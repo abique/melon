@@ -69,6 +69,16 @@ extern "C" {
    * @name Time
    * @{
    */
+
+# define MELON_NANOSECOND (1)
+# define MELON_MICROSECOND (1000 * MELON_NANOSECOND)
+# define MELON_MILLISECOND (1000 * MELON_MICROSECOND)
+# define MELON_SECOND (1000 * MELON_MILLISECOND)
+# define MELON_MINUTE (60 * MELON_SECOND)
+# define MELON_HOUR (60 * MELON_MINUTE)
+# define MELON_DAY (24 * MELON_HOUR)
+# define MELON_WEEK (7 * MELON_DAY)
+
   /** gets the time in nanoseconds */
   melon_time_t melon_time(void);
   unsigned int melon_sleep(uint32_t secs);

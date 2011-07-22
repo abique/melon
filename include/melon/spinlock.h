@@ -25,6 +25,7 @@ static inline void melon_spin_unlock(melon_spinlock * lock)
 
 static inline void melon_spin_destroy(melon_spinlock * lock)
 {
+  (void)lock;
 }
 
 # ifdef __cplusplus

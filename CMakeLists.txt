@@ -5,6 +5,7 @@ project(melon C)
 enable_testing()
 
 add_definitions(-D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
+include_directories(include)
 
 add_library(melon
   src/barrier.c
@@ -73,3 +74,5 @@ add_test(io io)
 
 test_exec(barrier tests/barrier.c)
 add_test(barrier barrier)
+
+test_exec(doc-sample tests/doc-sample.c)

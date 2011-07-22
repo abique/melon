@@ -32,6 +32,8 @@ extern "C" {
   /** blocks until there is no more fibers left in melon */
   void melon_wait(void);
   void melon_deinit(void);
+  int melon_kthread_add(uint16_t nb);
+  int melon_kthread_release(uint16_t nb);
   /** @} */
 
   /**

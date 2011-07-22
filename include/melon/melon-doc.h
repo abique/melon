@@ -11,17 +11,93 @@ For exemple read(int fd, void * data, size_t size, melon_time_t timeout).
 
 @section Why Why ?
 
+Have you ever tried google's <a href="http://golang.org">go</a> ?<br>
+It's nice because you can create a lot of goroutines write synchronous
+code, which behaves like multithreaded asynchronous code with a low overhead.
+It makes things really easier. Because writting multithreaded asynchronous code
+is error prone.
+
+Melon tries to bring fibers to C/C++ in a transparent and familiar way, by using
+known API patterns (POSIX for C API, and custom API for the C++ binding).<br>
+So you can refer to standard documentation to know what melon_read() returns etc...
+Excepts that our version has 1 more parameter: timeout. You don't have to do it yourself.
+
+@section ToKnow Things you may know before starting
+
+@li \ref melon_time_t is int64_t type and represent the number of nanoseconds of the MONOTONIC_CLOCK
+(one which is not subject to change).
+@li every timeout are absolute, you should use melon_time() to get the current time,
+and add the amount of desired nanoseconds.
+@li synchronisation functions only works in a melon_thread, which means that you can't use them in
+the main() function.
+
 @section APIS The C API and the C++ binding
 
 @subsection APIC The C API, POSIX like
 
-The C API has been done to match posix as close as possible.
+The C API has been done to match POSIX as close as possible.
 So you can easily try to replace pthreads by melon in your software.
 
 @subsubsection Initialisation
 
+Before being able to use melon, you have to initialise it.
+@code
+#include <melon/melon.h>
+
+void * my_fiber(void * ctx)
+{
+  // do what you want
+}
+
+int main(int argc, char ** argv)
+{
+  if (melon_init(0)) // initialises melon, and use the default number of kernel threads
+    return 1;
+
+  melon_fiber_startlight(my_fiber, NULL); // creates at least one fiber
+  // you can't use join/detach/lock/... from the main thread, you must be doing it
+  // in a fiber thread.
+
+  melon_wait(); // waits for every fibers to terminate
+  melon_deinit();
+  return 0;
+}
+@endcode
+
 @subsubsection APIMATCH Correspondance between POSIX and melon
 
+Runtime
+<table>
+<tr>
+<td></td>
+<td>\ref melon_init</td>
+<td>initialise melon</td>
+</tr>
+<tr>
+<td></td>
+<td>\ref melon_wait</td>
+<td>waits for every fibers to finish</td>
+</tr>
+<tr>
+<td></td>
+<td>\ref melon_deinit</td>
+<td>deinitialise melon</td>
+</tr>
+<tr>
+<td></td>
+<td>\ref melon_kthread_add</td>
+<td>adds kernel thread to the thread pool</td>
+</tr>
+<tr>
+<td></td>
+<td>\ref melon_kthread_release</td>
+<td>removes kernel thread from the thread pool</td>
+</tr>
+</table>
+
+<br>
+
+Fiber
 <table>
 <tr>
 <td>pthread_t</td>
@@ -67,6 +143,38 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Spinlock
+<table>
+<tr>
+<td>pthread_spinlock_t</td>
+<td>\ref melon_spinlock</td>
+<td></td>
+</tr>
+<tr>
+<td>pthread_spin_init</td>
+<td>\ref melon_spin_init</td>
+<td></td>
+</tr>
+<tr>
+<td>pthread_spin_lock</td>
+<td>\ref melon_spin_lock</td>
+<td></td>
+</tr>
+<tr>
+<td>pthread_spin_unlock</td>
+<td>\ref melon_spin_unlock</td>
+<td></td>
+</tr>
+<tr>
+<td>pthread_spin_destroy</td>
+<td>\ref melon_spin_destroy</td>
+<td></td>
+</tr>
+</table>
+
+<br>
+
+Mutex
 <table>
 <tr>
 <td>pthread_mutex_t *</td>
@@ -107,6 +215,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+RWLock
 <table>
 <tr>
 <td>pthread_rwlock_t *</td>
@@ -162,6 +271,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Condition
 <table>
 <tr>
 <td>pthread_cond_t *</td>
@@ -202,6 +312,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Barrier
 <table>
 <tr>
 <td>pthread_barrier_t *</td>
@@ -237,6 +348,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Semaphore
 <table>
 <tr>
 <td></td>
@@ -277,6 +389,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Sleeps
 <table>
 <tr>
 <td>sleep</td>
@@ -292,6 +405,7 @@ So you can easily try to replace pthreads by melon in your software.
 
 <br>
 
+Input/Output and network related stuff
 <table>
 <tr>
 <td>read</td>
@@ -373,5 +487,22 @@ So you can easily try to replace pthreads by melon in your software.
 
 @subsection APICPP The C++ API, Qt like and provides RAII
 
+The goal of the C++ API is:
+@li to provide an object oriented API
+@li to provide <a href="http://en.wikipedia.org/wiki/RAII">RAII</a> way of using Melon
 
+@subsection API2CLASS The API and class correspondance
+
+<table>
+<tr><td>melon_init, melon_deinit, melon_wait</td><td>melon::Melon</td></tr>
+<tr><td>melon_fiber_*</td><td>melon::Fiber</td></tr>
+<tr><td>melon_spin_*</td><td>melon::SpinLock</td></tr>
+<tr><td>melon_mutex_*</td><td>melon::Mutex</td></tr>
+<tr><td>melon_rwlock_*</td><td>melon::RWLock</td></tr>
+<tr><td>melon_cond_*</td><td>melon::Condition</td></tr>
+<tr><td>melon_barrier_*</td><td>melon::Barrier</td></tr>
+<tr><td>melon_sem_*</td><td>melon::Semaphore</td></tr>
+</table>
+
+<br>
 */

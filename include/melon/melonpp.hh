@@ -17,6 +17,7 @@ namespace melon
   public:
     inline Melon(uint16_t nb_threads) { init_succeed = !::melon_init(nb_threads); }
     inline ~Melon() { ::melon_deinit(); }
+
     inline bool ok() const { return init_succeed_; }
     inline void wait() { ::melon_wait(); }
   private:
@@ -68,6 +69,19 @@ namespace melon
     T &  mutex_;
   };
 
+  class SpinLock : private NonCopyable
+  {
+  public:
+    typedef Locker<SpinLock> Locker;
+    typedef UniqueLocker<SpinLock> UniqueLocker;
+    inline SpinLock() { ::melon_spin_init(&spinlock_); }
+    inline ~SpinLock() { ::melon_spin_destroy(spinlock_); }
+    inline void lock() { ::melon_spin_lock(&spinlock_); }
+    inline void unlock() { ::melon_spin_unlock(&spinlock_); }
+  private:
+    ::melon_mutex * spinlock_;
+  };
+
   class Mutex : private NonCopyable
   {
   public:
@@ -104,7 +118,7 @@ namespace melon
     RwLock lock_;
   };
 
-  class ReadWriteLock : public NonCopyable
+  class RWLock : public NonCopyable
   {
   public:
     typedef ReadWriteLocker<ReadWriteLock> Locker;

@@ -7,7 +7,7 @@ enable_testing()
 add_definitions(-D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
 include_directories(include)
 
-add_library(melon
+set(MELON_SRCS
   src/barrier.c
   src/cond.c
   src/fiber.c
@@ -21,7 +21,20 @@ add_library(melon
   src/stack_alloc.c
   src/timer_manager.c
 )
+
+add_library(melon SHARED ${MELON_SRCS})
 target_link_libraries(melon pthread rt)
+set_target_properties(melon PROPERTIES VERSION 0.6.0 SOVERSION 0)
+
+add_library(smelon STATIC ${MELON_SRCS})
+target_link_libraries(smelon pthread rt)
+set_target_properties(smelon PROPERTIES OUTPUT_NAME melon)
+
+install(TARGETS melon smelon
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+
+install(DIRECTORY include/melon DESTINATION include)
 
 add_custom_target(tests ctest)
 

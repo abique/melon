@@ -17,10 +17,17 @@ code, which behaves like multithreaded asynchronous code with a low overhead.
 It makes things really easier. Because writting multithreaded asynchronous code
 is error prone.
 
-Melon tries to bring fibers to C/C++ in a transparent and familiar way, by using
-known API patterns (POSIX for C API, and custom API for the C++ binding).<br>
+Melon tries to bring fibers to the C language in a transparent and familiar way,
+by using known POSIX API patterns.<br>
 So you can refer to standard documentation to know what melon_read() returns etc...
-Excepts that our version has 1 more parameter: timeout. You don't have to do it yourself.
+Excepts that our version has 1 more parameter: timeout.
+So you don't have to manage timeouts yourself.
+
+@section Cpp If you are looking for a C++ binding
+
+Melon is perfectly usable for a C++ programmer. Buf if you are looking for an
+object and RAII approach, then I suggest you to use
+<a href="https://github.com/babali/mimosa">Mimosa</a>.
 
 @section ToKnow Things you may know before starting
 
@@ -31,14 +38,12 @@ and add the amount of desired nanoseconds.
 @li synchronisation functions only works in a melon_thread, which means that you can't use them in
 the main() function.
 
-@section APIS The C API and the C++ binding
-
-@subsection APIC The C API, POSIX like
+@section APIC The C API, POSIX like
 
 The C API has been done to match POSIX as close as possible.
 So you can easily try to replace pthreads by melon in your software.
 
-@subsubsection Initialisation
+@subsection Initialisation
 
 Before being able to use melon, you have to initialise it.
 @code
@@ -64,7 +69,7 @@ int main(int argc, char ** argv)
 }
 @endcode
 
-@subsubsection APIMATCH Correspondance between POSIX and melon
+@subsection APIMATCH Correspondance between POSIX and melon
 
 Runtime
 <table>
@@ -483,25 +488,6 @@ Input/Output and network related stuff
 <td>\ref melon_sendfile</td>
 <td></td>
 </tr>
-</table>
-
-@subsection APICPP The C++ API, Qt like and provides RAII
-
-The goal of the C++ API is:
-@li to provide an object oriented API
-@li to provide <a href="http://en.wikipedia.org/wiki/RAII">RAII</a> way of using Melon
-
-@subsection API2CLASS The API and class correspondance
-
-<table>
-<tr><td>melon_init, melon_deinit, melon_wait</td><td>melon::Melon</td></tr>
-<tr><td>melon_fiber_*</td><td>melon::Fiber</td></tr>
-<tr><td>melon_spin_*</td><td>melon::SpinLock</td></tr>
-<tr><td>melon_mutex_*</td><td>melon::Mutex</td></tr>
-<tr><td>melon_rwlock_*</td><td>melon::RWLock</td></tr>
-<tr><td>melon_cond_*</td><td>melon::Condition</td></tr>
-<tr><td>melon_barrier_*</td><td>melon::Barrier</td></tr>
-<tr><td>melon_sem_*</td><td>melon::Semaphore</td></tr>
 </table>
 
 <br>

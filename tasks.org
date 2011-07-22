@@ -75,11 +75,14 @@
    CLOSED: [2011-07-20 Wed 00:18]
 ** TODO test rw mutex
 ** TODO test semaphore
-** TODO test barrier
+** DONE test barrier
+   CLOSED: [2011-07-22 Fri 16:01]
 * Portability
 ** TODO port to opensolaris/solaris/openindiana
 ** TODO port to freebsd
 ** TODO port to windows
 * Documentation
-** TODO make a doxyfile
-** TODO publish the documentation on the web
+** DONE make a doxyfile
+   CLOSED: [2011-07-22 Fri 16:02]
+** DONE publish the documentation on the web
+   CLOSED: [2011-07-22 Fri 16:02]

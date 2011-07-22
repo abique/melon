@@ -1,3 +1,8 @@
+2011-07-22  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* doc: wrote some doxygen docs
+	* c++: moved the c++ binding to a new library called mimosa
+
 2011-07-20  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* fiber_start: sed start -> startlight

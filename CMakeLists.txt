@@ -4,6 +4,9 @@ project(melon C)
 
 enable_testing()
 
+file(STRINGS VERSION MELON_VERSION)
+message("melon version: ${MELON_VERSION}")
+
 add_definitions(-D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
 include_directories(include)
 
@@ -24,7 +27,7 @@ set(MELON_SRCS
 
 add_library(melon SHARED ${MELON_SRCS})
 target_link_libraries(melon pthread rt)
-set_target_properties(melon PROPERTIES VERSION 0.6.0 SOVERSION 0)
+set_target_properties(melon PROPERTIES VERSION ${MELON_VERSION} SOVERSION 0)
 
 add_library(smelon STATIC ${MELON_SRCS})
 target_link_libraries(smelon pthread rt)

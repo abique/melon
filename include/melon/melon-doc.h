@@ -392,6 +392,11 @@ Sleeps
 Input/Output and network related stuff
 <table>
 <tr>
+<td>close</td>
+<td>\ref melon_close</td>
+<td></td>
+</tr>
+<tr>
 <td>read</td>
 <td>\ref melon_read</td>
 <td></td>

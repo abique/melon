@@ -100,8 +100,9 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
   melon_fiber *      self = g_current_fiber;
 
   assert(fildes >= 0);
-  pthread_mutex_lock(&g_melon.lock);
   self->waited_event = waited_events;
+  self->io_canceled  = 0;
+  pthread_mutex_lock(&g_melon.lock);
   melon_dlist_push(g_melon.io_blocked[fildes], self, );
 
   struct epoll_event ep_event;
@@ -131,6 +132,11 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
   {
     errno = -ETIMEDOUT;
     return -ETIMEDOUT;
+  }
+  if (self->io_canceled)
+  {
+    errno = -ECANCELED;
+    return -ECANCELED;
   }
   return 0;
 }

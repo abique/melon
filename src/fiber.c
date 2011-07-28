@@ -79,6 +79,7 @@ static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
   fiber->timer_prev       = NULL;
   fiber->waited_event     = kEventNone;
   fiber->name             = "(none)";
+  fiber->io_canceled      = 0;
   fiber->start_cb         = fct;
   fiber->start_ctx        = ctx;
   fiber->sched_next_cb    = NULL;

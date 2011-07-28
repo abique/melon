@@ -9,8 +9,32 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "private.h"
+
+int melon_close(int fildes)
+{
+  assert(fildes >= 0);
+  int ret = pthread_mutex_lock(&g_melon.lock);
+  assert(!ret);
+
+  melon_fiber * curr = g_melon.io_blocked[fildes];
+  while (1)
+  {
+    melon_dlist_pop(g_melon.io_blocked[fildes], curr, );
+    if (!curr)
+      break;
+    curr->waited_event = kEventNone;
+    if (curr->timer > 0)
+      melon_timer_remove_locked(curr);
+    curr->io_canceled = 1;
+    melon_sched_ready_locked(curr);
+  }
+
+  pthread_mutex_unlock(&g_melon.lock);
+  return close(fildes);
+}
 
 int64_t melon_write(int fildes, const void * data, uint64_t nbyte, melon_time_t timeout)
 {

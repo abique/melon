@@ -91,6 +91,7 @@ extern "C" {
     ucontext_t     ctx;
     MelonEvent     waited_event;
     const char *   name;
+    int            io_canceled;
 
     /* start callback */
     void *         (*start_cb)(void *);

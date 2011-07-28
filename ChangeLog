@@ -1,6 +1,8 @@
 2011-07-28  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.7.0
 	* io.c: implemented melon_close()
+	* melon.h: removed restrict as is makes problems in C++
 
 2011-07-22  Alexandre Bique  <bique.alexandre@gmail.com>
 

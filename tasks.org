@@ -20,7 +20,11 @@
    CLOSED: [2011-07-20 Wed 13:02]
 ** DONE barrier
    CLOSED: [2011-07-20 Wed 12:12]
+** TODO kthread_add
+** TODO kthread_release
+** TODO fiber local storage ??
 * POSIX interfaces
+** TODO melon_close
 ** DONE melon_sleep()
    CLOSED: [2011-07-20 Wed 00:17]
 ** DONE melon_usleep()

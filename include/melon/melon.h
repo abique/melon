@@ -32,8 +32,8 @@ extern "C" {
   /** blocks until there is no more fibers left in melon */
   void melon_wait(void);
   void melon_deinit(void);
-  int melon_kthread_add(uint16_t nb);
-  int melon_kthread_release(uint16_t nb);
+  int melon_kthread_add(int16_t nb);
+  int melon_kthread_release(int16_t nb);
   /** @} */
 
   /**
@@ -151,6 +151,15 @@ extern "C" {
    * @name Input/Output
    * @{
    */
+  /**
+   * @fn melon_close
+   * @brief closes a file descriptor
+   * When called, this function wake up fibers waiting for events on this
+   * file descriptor and then closes it. Woked up fibers will receive ECANCELED
+   * error on their I/O.
+   * @param fildes the file descriptor to close
+   */
+  int melon_close(int fildes);
   int64_t melon_write(int fildes, const void * data, uint64_t nbyte, melon_time_t timeout);
   int64_t melon_pwrite(int fildes, const void * data, uint64_t nbyte, int64_t offset, melon_time_t timeout);
   int64_t melon_writev(int fildes, const struct iovec *iov, int iovcnt, melon_time_t timeout);
@@ -162,11 +171,11 @@ extern "C" {
   int64_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, int64_t offset, melon_time_t timeout);
 
   int melon_connect(int socket, const struct sockaddr *address, socklen_t address_len, melon_time_t timeout);
-  int melon_accept(int socket, struct sockaddr * restrict address, socklen_t * restrict address_len, melon_time_t timeout);
+  int melon_accept(int socket, struct sockaddr * address, socklen_t * address_len, melon_time_t timeout);
   int64_t melon_sendto(int socket, const void *message, uint64_t length,
                        int flags, const struct sockaddr *dest_addr,
                        socklen_t dest_len, melon_time_t timeout);
-  int64_t melon_recvfrom(int socket, void *restrict buffer, uint64_t length,
+  int64_t melon_recvfrom(int socket, void *buffer, uint64_t length,
                          int flags, struct sockaddr * address,
                          socklen_t * address_len, melon_time_t timeout);
   int64_t melon_recvmsg(int socket, struct msghdr *message, int flags, melon_time_t timeout);
@@ -195,6 +204,11 @@ extern "C" {
 #   undef usleep
 #  endif
 #  define usleep(Args...) melon_usleep(Args)
+
+#  ifdef close
+#   undef close
+#  endif
+#  define close(Args...) melon_close(Args)
 
 /*
 

@@ -1,3 +1,7 @@
+2011-07-28  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* io.c: implemented melon_close()
+
 2011-07-22  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* release: 0.6.0

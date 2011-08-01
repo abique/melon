@@ -26,15 +26,16 @@ static void * handle_client(void * ctx)
   return NULL;
 }
 
-static void * start_server(void * ctx)
+MELON_MAIN(argc, argv)
 {
-  (void)ctx;
+  (void)argc;
+  (void)argv;
 
   int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0)
   {
     perror("socket");
-    return NULL;
+    return;
   }
   struct sockaddr_in addr;
   addr.sin_family      = AF_INET;
@@ -45,14 +46,14 @@ static void * start_server(void * ctx)
   {
     close(fd);
     perror("bind");
-    return NULL;
+    return;
   }
 
   if (listen(fd, 5))
   {
     close(fd);
     perror("listen");
-    return NULL;
+    return;
   }
 
   while (1)
@@ -78,18 +79,4 @@ static void * start_server(void * ctx)
     }
   }
   return NULL;
-}
-
-int main(void)
-{
-  if (melon_init(0)) // initialises melon, and use the default number of kernel threads
-    return 1;
-
-  melon_fiber_startlight(start_server, NULL); // creates at least one fiber
-  // you can't use join/detach/lock/... from the main thread, you must be doing it
-  // in a fiber thread.
-
-  melon_wait(); // waits for every fibers to terminate
-  melon_deinit();
-  return 0;
 }

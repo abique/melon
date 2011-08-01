@@ -35,7 +35,7 @@ MELON_MAIN(argc, argv)
   if (fd < 0)
   {
     perror("socket");
-    return;
+    return 1;
   }
   struct sockaddr_in addr;
   addr.sin_family      = AF_INET;
@@ -46,14 +46,14 @@ MELON_MAIN(argc, argv)
   {
     close(fd);
     perror("bind");
-    return;
+    return 1;
   }
 
   if (listen(fd, 5))
   {
     close(fd);
     perror("listen");
-    return;
+    return 1;
   }
 
   while (1)
@@ -78,5 +78,5 @@ MELON_MAIN(argc, argv)
       continue;
     }
   }
-  return NULL;
+  return 1;
 }

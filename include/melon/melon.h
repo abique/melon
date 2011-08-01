@@ -204,16 +204,16 @@ extern "C" {
 # define MELON_MAIN(Argc, Argv)                                 \
   typedef struct                                                \
   {                                                             \
-    int argc;                                                   \
+    int     argc;                                               \
     char ** argv;                                               \
-    int retval;                                                 \
+    int     retval;                                             \
   }  __melon_main_data;                                         \
                                                                 \
   static int __melon_main(int argc, char ** argv);              \
   static void * __main_wrapper(void * data)                     \
   {                                                             \
     __melon_main_data * md = (__melon_main_data*)data;          \
-    md->retval = __melon_main(argc, argv);                      \
+    md->retval = __melon_main(md->argc, md->argv);              \
     return NULL;                                                \
   }                                                             \
                                                                 \
@@ -236,6 +236,7 @@ extern "C" {
     melon_deinit();                                             \
     return 0;                                                   \
   }                                                             \
+                                                                \
   static int __melon_main(int Argc, char ** Argv)
 
 # ifdef MELON_OVERRIDE_POSIX

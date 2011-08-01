@@ -46,7 +46,7 @@ So you can easily try to replace pthreads by melon in your software.
 @subsection Initialisation
 
 Before being able to use melon, you have to initialise it.
-@include tests/doc-sample.c
+@include hello_world.c
 
 @subsection APIMATCH Correspondance between POSIX and melon
 
@@ -496,5 +496,11 @@ Streams
 </table>
 
 <br>
+
+@section Samples Samples
+
+@subsection EchoServer Echo server
+
+@include echo_server.c
 
 */

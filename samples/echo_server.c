@@ -44,21 +44,21 @@ MELON_MAIN(argc, argv)
 
   if (bind(fd, (struct sockaddr *)&addr, sizeof (addr)))
   {
-    close(fd);
+    melon_close(fd);
     perror("bind");
     return 1;
   }
 
   if (listen(fd, 5))
   {
-    close(fd);
+    melon_close(fd);
     perror("listen");
     return 1;
   }
 
   while (1)
   {
-    int client = accept(fd, NULL, NULL);
+    int client = melon_accept(fd, NULL, NULL, 0);
     if (client < 0)
       continue;
 
@@ -66,7 +66,7 @@ MELON_MAIN(argc, argv)
     if (!data)
     {
       perror("malloc");
-      close(client);
+      melon_close(client);
       continue;
     }
     *data = client;
@@ -74,7 +74,7 @@ MELON_MAIN(argc, argv)
     if (melon_fiber_startlight(handle_client, data))
     {
       free(data);
-      close(client);
+      melon_close(client);
       continue;
     }
   }

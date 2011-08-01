@@ -67,14 +67,11 @@ static int scan_mode(const char * mode)
 
 FILE * melon_fopen(const char * path, const char * mode, const melon_time_t * timeout)
 {
-  stream_cookie * cookie = malloc(sizeof (*cookie));
-  cookie->fd             = open(path, scan_mode(mode), 0644);
-  cookie->timeout        = timeout;
-  FILE *          stream = fopencookie(cookie, mode, io_funcs);
-  if (stream)
-    return stream;
-  close(cookie->fd);
-  free(cookie);
+  int fd = open(path, scan_mode(mode), 0644);
+  FILE * file = melon_fdopen(fd, mode, timeout);
+  if (file)
+    return file;
+  close(fd);
   return NULL;
 }
 

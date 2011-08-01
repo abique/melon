@@ -22,6 +22,7 @@ set(MELON_SRCS
   src/sched.c
   src/sem.c
   src/stack_alloc.c
+  src/stream.c
   src/timer_manager.c
 )
 

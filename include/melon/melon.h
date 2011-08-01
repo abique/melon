@@ -7,6 +7,7 @@
 # include <sys/socket.h>
 # include <sys/sendfile.h>
 # include <fcntl.h>
+# include <stdio.h>
 
 # include "spinlock.h"
 
@@ -190,6 +191,9 @@ extern "C" {
   int64_t melon_vmsplice(int fd, const struct iovec *iov,
                          unsigned long nr_segs, unsigned int flags, melon_time_t timeout);
 #  endif
+
+  FILE * melon_fopen(const char * path, const char * mode, const melon_time_t * timeout);
+  FILE * melon_fdopen(int fd, const char * mode, const melon_time_t * timeout);
 
   /** @} */
 

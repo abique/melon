@@ -32,8 +32,11 @@ extern "C" {
   int melon_init(uint16_t nb_threads);
   /** blocks until there is no more fibers left in melon */
   void melon_wait(void);
+  /** deinitialize melon */
   void melon_deinit(void);
+  /** adds threads to the thread pool */
   int melon_kthread_add(int16_t nb);
+  /** removes threads from the thread pool */
   int melon_kthread_release(int16_t nb);
   /** @} */
 
@@ -196,6 +199,44 @@ extern "C" {
   FILE * melon_fdopen(int fd, const char * mode, const melon_time_t * timeout);
 
   /** @} */
+
+
+# define MELON_MAIN(Argc, Argv)                                 \
+  typedef struct                                                \
+  {                                                             \
+    int argc;                                                   \
+    char ** argv;                                               \
+    int retval;                                                 \
+  }  __melon_main_data;                                         \
+                                                                \
+  static int __melon_main(int argc, char ** argv);              \
+  static void * __main_wrapper(void * data)                     \
+  {                                                             \
+    __melon_main_data * md = (__melon_main_data*)data;          \
+    md->retval = __melon_main(argc, argv);                      \
+    return NULL;                                                \
+  }                                                             \
+                                                                \
+  int main(int argc, char ** argv)                              \
+  {                                                             \
+    if (melon_init(0))                                          \
+    {                                                           \
+      fprintf(stderr, "failed to initialize melon.\n");         \
+      return 1;                                                 \
+    }                                                           \
+                                                                \
+    __melon_main_data data = { argc, argv, 0 };;                \
+    if (melon_fiber_startlight(__main_wrapper, &data))          \
+    {                                                           \
+      fprintf(stderr, "failed to create the first fiber.\n");   \
+      melon_deinit();                                           \
+      return 1;                                                 \
+    }                                                           \
+    melon_wait();                                               \
+    melon_deinit();                                             \
+    return 0;                                                   \
+  }                                                             \
+  static int __melon_main(int Argc, char ** Argv)
 
 # ifdef MELON_OVERRIDE_POSIX
 

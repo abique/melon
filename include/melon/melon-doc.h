@@ -475,4 +475,26 @@ Input/Output and network related stuff
 </table>
 
 <br>
+
+Streams
+<table>
+<tr>
+<td>FILE*</td>
+<td>FILE*</td>
+<td></td>
+</tr>
+<tr>
+<td>fopen</td>
+<td>\ref melon_fopen</td>
+<td></td>
+</tr>
+<tr>
+<td>fdopen</td>
+<td>\ref melon_fdopen</td>
+<td></td>
+</tr>
+</table>
+
+<br>
+
 */

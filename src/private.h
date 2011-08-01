@@ -125,6 +125,12 @@ extern "C" {
     int                  join_is_finished;
   };
 
+  typedef struct melon_fd
+  {
+    melon_fiber * fibers;   // linked list
+    int           is_in_epoll; // is in epoll
+  } melon_fd;
+
   typedef struct melon
   {
     /* the big melon lock */
@@ -134,9 +140,8 @@ extern "C" {
     melon_fiber *  ready;
     pthread_cond_t ready_cond;
 
-    /* vector of linked list of fiber waiting for io events
-     * n producers, 1 consumer */
-    melon_fiber ** io_blocked;
+    /* vector of io ctx */
+    melon_fd * io;
 
     /* epoll stuff */
     int       epoll_fd;

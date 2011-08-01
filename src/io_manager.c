@@ -15,13 +15,13 @@ int melon_io_manager_init(void)
 
 static void melon_io_manager_handle(struct epoll_event * event)
 {
-  melon_fiber * curr = g_melon.io_blocked[event->data.fd];
+  melon_fiber * curr = g_melon.io[event->data.fd].fibers;
   melon_fiber * next = NULL;
 
   for (; curr; curr = next)
   {
     if (curr->next == curr ||
-        curr->next == g_melon.io_blocked[event->data.fd])
+        curr->next == g_melon.io[event->data.fd].fibers)
       next = NULL;
     else
       next = curr->next;
@@ -31,7 +31,7 @@ static void melon_io_manager_handle(struct epoll_event * event)
         (curr->waited_event & kEventIoWrite && (event->events & (EPOLLOUT))))
     {
       curr->waited_event = kEventNone;
-      melon_dlist_unlink(g_melon.io_blocked[event->data.fd], curr, );
+      melon_dlist_unlink(g_melon.io[event->data.fd].fibers, curr, );
       if (curr->timer > 0)
         melon_timer_remove_locked(curr);
       melon_sched_ready_locked(curr);
@@ -90,7 +90,7 @@ struct waitfor_ctx
 static void waitfor_cb(struct waitfor_ctx * ctx)
 {
   ctx->timeout = 1;
-  melon_dlist_unlink(g_melon.io_blocked[ctx->fildes], ctx->fiber, );
+  melon_dlist_unlink(g_melon.io[ctx->fildes].fibers, ctx->fiber, );
   melon_sched_ready_locked(ctx->fiber);
 }
 
@@ -100,17 +100,38 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
   melon_fiber *      self = g_current_fiber;
 
   assert(fildes >= 0);
-  self->waited_event = waited_events;
-  self->io_canceled  = 0;
   pthread_mutex_lock(&g_melon.lock);
-  melon_dlist_push(g_melon.io_blocked[fildes], self, );
 
   struct epoll_event ep_event;
   ep_event.events = (waited_events & kEventIoRead ? EPOLLIN : 0) |
     (waited_events & kEventIoWrite ? EPOLLOUT : 0) |
     EPOLLONESHOT;
   ep_event.data.fd = fildes;
-  epoll_ctl(g_melon.epoll_fd, EPOLL_CTL_ADD, fildes, &ep_event);
+  ctl:
+  if (epoll_ctl(g_melon.epoll_fd,
+                g_melon.io[fildes].is_in_epoll ? EPOLL_CTL_MOD : EPOLL_CTL_ADD,
+                fildes, &ep_event))
+  {
+    if (errno == EEXIST)
+    {
+      g_melon.io[fildes].is_in_epoll = 1;
+      write(STDERR_FILENO, "critical, should not append\n", 28);
+      goto ctl;
+    }
+    if (errno == ENOENT)
+    {
+      g_melon.io[fildes].is_in_epoll = 0;
+      write(STDERR_FILENO, "critical, don't forget to call melon_close()\n", 45);
+      goto ctl;
+    }
+    return -errno;
+  }
+
+  self->waited_event = waited_events;
+  self->io_canceled  = 0;
+  g_melon.io[fildes].is_in_epoll = 1;
+  melon_dlist_push(g_melon.io[fildes].fibers, self, );
+
   if (timeout > 0)
   {
     ctx.fiber       = self;

@@ -93,3 +93,4 @@ test_exec(barrier tests/barrier.c)
 add_test(barrier barrier)
 
 test_exec(doc-sample tests/doc-sample.c)
+test_exec(echo_server tests/echo_server.c)

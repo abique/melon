@@ -19,10 +19,10 @@ int melon_close(int fildes)
   int ret = pthread_mutex_lock(&g_melon.lock);
   assert(!ret);
 
-  melon_fiber * curr = g_melon.io_blocked[fildes];
+  melon_fiber * curr = g_melon.io[fildes].fibers;
   while (1)
   {
-    melon_dlist_pop(g_melon.io_blocked[fildes], curr, );
+    melon_dlist_pop(g_melon.io[fildes].fibers, curr, );
     if (!curr)
       break;
     curr->waited_event = kEventNone;
@@ -31,6 +31,7 @@ int melon_close(int fildes)
     curr->io_canceled = 1;
     melon_sched_ready_locked(curr);
   }
+  g_melon.io[fildes].is_in_epoll = 0;
 
   pthread_mutex_unlock(&g_melon.lock);
   return close(fildes);

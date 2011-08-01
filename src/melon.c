@@ -50,8 +50,8 @@ int melon_init(uint16_t nb_threads)
     rlimit_nofile = rl.rlim_max;
 
   /* allocate io_blocked */
-  g_melon.io_blocked = calloc(1, sizeof (*g_melon.io_blocked) * rlimit_nofile);
-  if (!g_melon.io_blocked)
+  g_melon.io = calloc(1, sizeof (*g_melon.io) * rlimit_nofile);
+  if (!g_melon.io)
     goto failure_calloc;
 
   /* initialize io manager */
@@ -85,8 +85,8 @@ int melon_init(uint16_t nb_threads)
 
   failure_io_manager:
   /* free io_blocked */
-  free(g_melon.io_blocked);
-  g_melon.io_blocked = NULL;
+  free(g_melon.io);
+  g_melon.io = NULL;
 
   failure_calloc:
   pthread_cond_destroy(&g_melon.fibers_count_zero);
@@ -131,8 +131,8 @@ void melon_deinit()
   pthread_mutex_destroy(&g_melon.lock);
 
   /* io_blocked */
-  free(g_melon.io_blocked);
-  g_melon.io_blocked = NULL;
+  free(g_melon.io);
+  g_melon.io = NULL;
 }
 
 void melon_wait()

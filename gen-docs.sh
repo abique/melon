@@ -1,5 +1,14 @@
 #! /bin/bash
 
+push=0
+
+for arg in $@
+do
+  if [[ "$arg" = push ]] ; then
+    push=1
+  fi
+done
+
 cd doc/html &&
 git checkout $(git log --max-parents=0 | head -n 1 | cut -f 2 -d ' ') &&
 cd - &&
@@ -11,4 +20,6 @@ sed -i "s,</body>,<script type=\"text/javascript\">var gaJsHost = ((\"https:\" =
 cd - &&
 git add * &&
 git commit -a -m "generated docs" &&
-git push -f origin HEAD:gh-pages
+if [[ $push = 1 ]]; then
+  git push -f origin HEAD:gh-pages
+fi

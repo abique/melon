@@ -283,6 +283,11 @@ Condition
 <td></td>
 </tr>
 <tr>
+<td></td>
+<td>\ref melon_cond_signalnb</td>
+<td></td>
+</tr>
+<tr>
 <td>pthread_cond_broadcast</td>
 <td>\ref melon_cond_broadcast</td>
 <td></td>

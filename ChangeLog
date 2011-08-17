@@ -1,5 +1,8 @@
 2011-08-17  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.9.1
+	* fiber.c: fixed melon_fiber_timedjoin()
+	* melon.h, cond.c: added melon_cond_signalnb()
 	* release: 0.9.0
 	* melon.h, io.c: added melon_cancelio()
 

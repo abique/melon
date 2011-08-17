@@ -36,7 +36,7 @@ void melon_cond_wait(melon_cond * condition, melon_mutex * mutex)
 
   /* save the mutex to relock and its lock count */
   g_current_fiber->cond_mutex = mutex;
-  self->lock_count = lock_count;
+  self->lock_count            = lock_count;
 
   /* push the fiber in the wait queue */
   melon_spin_lock(&condition->lock);

@@ -123,39 +123,37 @@ int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t t
   return -ETIMEDOUT;
 }
 
-void melon_cond_signal(melon_cond * condition)
-{
-  pthread_mutex_lock(&g_melon.lock);
-  melon_spin_lock(&condition->lock);
-
-  melon_fiber * fiber = NULL;
-  melon_dlist_pop(condition->wait_queue, fiber, );
-  if (fiber)
-    melon_mutex_lock2(fiber, fiber->cond_mutex);
-
-  melon_spin_unlock(&condition->lock);
-  pthread_mutex_unlock(&g_melon.lock);
-}
-
-
 // TODO use pthread only for timed waits
-void melon_cond_broadcast(melon_cond * condition)
+int melon_cond_signalnb(melon_cond * condition, const int nb)
 {
   pthread_mutex_lock(&g_melon.lock);
   melon_spin_lock(&condition->lock);
   melon_fiber * list    = condition->wait_queue;
   condition->wait_queue = NULL;
+  int nwokeup           = 0;
 
   melon_fiber * fiber = NULL;
-  while (1)
+  while (nb == 0 || nwokeup < nb)
   {
     melon_dlist_pop(list, fiber, );
     if (!fiber)
       break;
+    ++nwokeup;
     if (fiber->timer > 0)
       melon_timer_remove_locked(fiber);
     melon_mutex_lock2(fiber, fiber->cond_mutex);
   }
   melon_spin_unlock(&condition->lock);
   pthread_mutex_unlock(&g_melon.lock);
+  return nwokeup;
+}
+
+int melon_cond_signal(melon_cond * condition)
+{
+  return melon_cond_signalnb(condition, 1);
+}
+
+int melon_cond_broadcast(melon_cond * condition)
+{
+  return melon_cond_signalnb(condition, 0);
 }

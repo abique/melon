@@ -124,8 +124,14 @@ extern "C" {
   void melon_cond_destroy(melon_cond * condition);
   void melon_cond_wait(melon_cond * condition, melon_mutex * mutex);
   int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
-  void melon_cond_signal(melon_cond * condition);
-  void melon_cond_broadcast(melon_cond * condition);
+  /** @return the number of woke up fibers */
+  int melon_cond_signal(melon_cond * condition);
+  /** if nb == 1, then equivalent to melon_cond_signal, if nb == 0
+   * then equivalent to melon_cond_broadcast
+   * @return the number of woke up fibers */
+  int melon_cond_signalnb(melon_cond * condition, int nb);
+  /** @return the number of woke up fibers */
+  int melon_cond_broadcast(melon_cond * condition);
   /** @} */
 
   /**

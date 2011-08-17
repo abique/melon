@@ -195,6 +195,8 @@ int melon_fiber_timedjoin(melon_fiber * fiber, void ** retval, melon_time_t time
       melon_mutex_unlock(fiber->join_mutex);
       goto timedout;
     }
+    else
+      melon_cond_broadcast(fiber->join_cond);
   }
   else
     melon_cond_broadcast(fiber->join_cond);

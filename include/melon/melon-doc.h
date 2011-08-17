@@ -397,6 +397,11 @@ Input/Output and network related stuff
 <td></td>
 </tr>
 <tr>
+<td></td>
+<td>\ref melon_cancelio</td>
+<td>cancel pending io on fildes</td>
+</tr>
+<tr>
 <td>read</td>
 <td>\ref melon_read</td>
 <td></td>

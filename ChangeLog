@@ -1,3 +1,8 @@
+2011-08-17  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* release: 0.9.0
+	* melon.h, io.c: added melon_cancelio()
+
 2011-08-02  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* release: 0.8.3

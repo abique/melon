@@ -164,6 +164,8 @@ extern "C" {
    * @param fildes the file descriptor to close
    */
   int melon_close(int fildes);
+  /** cancel pending io on fildes */
+  void melon_cancelio(int fildes);
   int64_t melon_write(int fildes, const void * data, uint64_t nbyte, melon_time_t timeout);
   int64_t melon_pwrite(int fildes, const void * data, uint64_t nbyte, int64_t offset, melon_time_t timeout);
   int64_t melon_writev(int fildes, const struct iovec *iov, int iovcnt, melon_time_t timeout);

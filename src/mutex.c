@@ -51,6 +51,7 @@ void melon_mutex_lock2(melon_fiber * fiber, melon_mutex * mutex)
 void melon_mutex_lock(struct melon_mutex * mutex)
 {
   melon_fiber * self = melon_fiber_self();
+  assert(self && "you can't lock melon mutex out of an initialized thread");
   self->timer        = 0;
   self->lock_count   = 1; // Initialise the lock count, see melon_cond_wait
                           // to understand. Not used while relocking recursive

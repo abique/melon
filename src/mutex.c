@@ -86,6 +86,7 @@ void melon_mutex_lock(struct melon_mutex * mutex)
 void melon_mutex_unlock(struct melon_mutex * mutex)
 {
   assert(mutex);
+  assert(mutex->lock_count > 0);
 
   if (--mutex->lock_count > 0)
     return;

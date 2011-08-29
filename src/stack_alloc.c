@@ -1,10 +1,17 @@
 #include <assert.h>
 #include <sys/mman.h>
+#include <signal.h>
 #include "private.h"
 
 #ifndef MAP_UNINITIALIZED
 # define MAP_UNINITIALIZED 0x0
 #endif
+
+#ifndef SIGSTKSZ
+# define SIGSTKSZ (64 * 1024)
+#endif
+
+#define MELON_STACK_SIZE (SIGSTKSZ >= 16 * 1024 ? SIGSTKSZ : 16 * 1024)
 
 typedef struct list
 {
@@ -34,7 +41,7 @@ void melon_stack_deinit()
     melon_list_pop(g_stack_list, item, next);
     if (!item)
       break;
-    munmap((void*)item, SIGSTKSZ);
+    munmap((void*)item, MELON_STACK_SIZE);
   }
   melon_spin_unlock(&g_stack_list_lock);
 }
@@ -45,7 +52,7 @@ void * melon_stack_alloc()
   if (!g_stack_list)
   {
     melon_spin_unlock(&g_stack_list_lock);
-    void * addr = mmap(NULL /* addr */, SIGSTKSZ /* size */,
+    void * addr = mmap(NULL /* addr */, MELON_STACK_SIZE /* size */,
                        PROT_READ | PROT_WRITE | PROT_EXEC,
                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED,
                        0 /* fd */, 0 /* offset */);
@@ -67,7 +74,7 @@ void melon_stack_free(void * addr)
 
   if (g_stack_list_nb > 100)
   {
-    munmap(addr, SIGSTKSZ);
+    munmap(addr, MELON_STACK_SIZE);
     return;
   }
 
@@ -80,5 +87,5 @@ void melon_stack_free(void * addr)
 
 uint32_t melon_stack_size()
 {
-  return SIGSTKSZ;
+  return MELON_STACK_SIZE;
 }

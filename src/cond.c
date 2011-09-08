@@ -3,12 +3,26 @@
 #include <errno.h>
 #include "private.h"
 
-melon_cond * melon_cond_new(void)
+int melon_condattr_init(melon_condattr ** attr)
 {
-  melon_cond * cond = malloc(sizeof (*cond));
-  melon_spin_init(&cond->lock);
-  cond->wait_queue = NULL;
-  return cond;
+  *attr = NULL;
+  return 0;
+}
+
+void melon_condattr_destroy(melon_condattr * attr)
+{
+  (void)attr;
+}
+
+int melon_cond_init(melon_cond ** cond, melon_condattr * attr)
+{
+  (void)attr;
+  *cond = malloc(sizeof (*cond));
+  if (!*cond)
+    return -1;
+  melon_spin_init(&(*cond)->lock);
+  (*cond)->wait_queue = NULL;
+  return 0;
 }
 
 void melon_cond_destroy(melon_cond * condition)

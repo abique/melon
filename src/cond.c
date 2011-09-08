@@ -73,6 +73,12 @@ static void melon_cond_timedwait_cb(struct wait_ctx * ctx)
 
 int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout)
 {
+  if (timeout == 0)
+  {
+    melon_cond_wait(condition, mutex);
+    return 0;
+  }
+
   melon_fiber * self = g_current_fiber;
 
   /* ensure that the mutex is locked */

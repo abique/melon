@@ -1,3 +1,11 @@
+2011-09-08  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* release: 0.9.3
+	* io_manager.c: major refactoring, splitting the wait queue into
+	a write queue and a read queue.
+	* cond.c: simplifying melon_cond_timedwait()
+	* mutex.c: simplifying melon_mutex_timedlock()
+
 2011-08-29  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* release: 0.9.2

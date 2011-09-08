@@ -15,13 +15,19 @@
 extern "C" {
 # endif
 
-  typedef int64_t              melon_time_t;
-  typedef struct melon_mutex   melon_mutex;
-  typedef struct melon_rwlock  melon_rwlock;
-  typedef struct melon_cond    melon_cond;
-  typedef struct melon_sem     melon_sem;
-  typedef struct melon_barrier melon_barrier;
-  typedef struct melon_fiber   melon_fiber;
+  typedef int64_t                  melon_time_t;
+  typedef struct melon_mutex       melon_mutex;
+  typedef struct melon_mutexattr   melon_mutexattr;
+  typedef struct melon_rwlock      melon_rwlock;
+  typedef struct melon_rwlockattr  melon_rwlockattr;
+  typedef struct melon_cond        melon_cond;
+  typedef struct melon_condattr    melon_condattr;
+  typedef struct melon_sem         melon_sem;
+  typedef struct melon_semattr     melon_semattr;
+  typedef struct melon_barrier     melon_barrier;
+  typedef struct melon_barrierattr melon_barrierattr;
+  typedef struct melon_fiber       melon_fiber;
+  typedef struct melon_fiberattr   melon_fiberattr;
 
   /**
    * @name Initialisation
@@ -93,7 +99,14 @@ extern "C" {
    * @name Mutex
    * @{
    */
-  melon_mutex * melon_mutex_new(int is_recursive);
+  int melon_mutexattr_init(melon_mutexattr ** attr);
+  void melon_mutexattr_destroy(melon_mutexattr * attr);
+# define MELON_MUTEX_NORMAL 1
+# define MELON_MUTEX_RECURSIVE 2
+  void melon_mutexattr_settype(melon_mutexattr * attr, int type);
+  int melon_mutexattr_gettype(melon_mutexattr * attr);
+
+  int melon_mutex_init(melon_mutex ** mutex, melon_mutexattr * attr);
   void melon_mutex_destroy(melon_mutex * mutex);
   void melon_mutex_lock(melon_mutex * mutex);
   void melon_mutex_unlock(melon_mutex * mutex);
@@ -105,7 +118,10 @@ extern "C" {
    * @name Read/Write lock
    * @{
    */
-  melon_rwlock * melon_rwlock_new(void);
+  int melon_rwlockattr_init(melon_rwlockattr ** attr);
+  void melon_rwlockattr_destroy(melon_rwlockattr * attr);
+
+  int melon_rwlock_init(melon_rwlock ** rwlock, melon_rwlockattr * attr);
   void melon_rwlock_destroy(melon_rwlock * rwlock);
   void melon_rwlock_rdlock(melon_rwlock * rwlock);
   int melon_rwlock_tryrdlock(melon_rwlock * rwlock);
@@ -120,7 +136,10 @@ extern "C" {
    * @name Condition
    * @{
    */
-  melon_cond * melon_cond_new(void);
+  int melon_condattr_init(melon_condattr ** attr);
+  void melon_condattr_destroy(melon_condattr * attr);
+
+  int melon_cond_init(melon_cond ** cond, melon_condattr * attr);
   void melon_cond_destroy(melon_cond * condition);
   void melon_cond_wait(melon_cond * condition, melon_mutex * mutex);
   int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t timeout);
@@ -138,6 +157,12 @@ extern "C" {
    * @name Semaphore
    * @{
    */
+  int melon_semattr_init(melon_semattr ** attr);
+  void melon_semattr_destroy(melon_semattr * attr);
+  void melon_semattr_setnb(melon_semattr * attr, int nb);
+  int melon_semattr_getnb(melon_semattr * attr);
+
+  int melon_sem_init(melon_sem ** sem, melon_semattr * attr);
   melon_sem * melon_sem_new(int nb);
   void melon_sem_destroy(melon_sem * sem);
   void melon_sem_acquire(melon_sem * sem, int nb);

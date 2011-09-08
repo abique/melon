@@ -151,6 +151,12 @@ static void melon_mutex_timedlock_cb(struct lock_ctx * ctx)
 
 int melon_mutex_timedlock(melon_mutex * mutex, uint64_t timeout)
 {
+  if (timeout == 0)
+  {
+    melon_mutex_lock(mutex);
+    return 0;
+  }
+
   // lets do a first spinlock only try
   if (!melon_mutex_trylock(mutex))
     return 0;

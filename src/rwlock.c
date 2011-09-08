@@ -4,34 +4,45 @@
 
 #include "private.h"
 
-melon_rwlock * melon_rwlock_new(void)
+int melon_rwlockattr_init(melon_rwlockattr ** attr)
 {
-  melon_rwlock * rwlock = malloc(sizeof (*rwlock));
-  if (!rwlock)
+  *attr = NULL;
+  return 0;
+}
+
+void melon_rwlockattr_destroy(melon_rwlockattr * attr)
+{
+  (void)attr;
+}
+
+int melon_rwlock_init(melon_rwlock ** rwlock, melon_rwlockattr * attr)
+{
+  *rwlock = malloc(sizeof (*rwlock));
+  if (!*rwlock)
     goto failure_malloc;
 
-  rwlock->lock = melon_mutex_new(0);
-  if (!rwlock->lock)
+  (*rwlock)->lock = melon_mutex_new(0);
+  if (!(*rwlock)->lock)
     goto failure_mutex;
-  rwlock->wcond = melon_cond_new();
-  if (!rwlock->wcond)
+  (*rwlock)->wcond = melon_cond_new();
+  if (!(*rwlock)->wcond)
     goto failure_cond1;
-  rwlock->rcond = melon_cond_new();
-  if (!rwlock->rcond)
+  (*rwlock)->rcond = melon_cond_new();
+  if (!(*rwlock)->rcond)
     goto failure_cond2;
-  rwlock->lock_count = 0;
-  rwlock->wowner = NULL;
-  rwlock->is_read = 0;
-  return rwlock;
+  (*rwlock)->lock_count = 0;
+  (*rwlock)->wowner = NULL;
+  (*rwlock)->is_read = 0;
+  return 0;
 
   failure_cond2:
-  melon_cond_destroy(rwlock->wcond);
+  melon_cond_destroy((*rwlock)->wcond);
   failure_cond1:
-  melon_mutex_destroy(rwlock->lock);
+  melon_mutex_destroy((*rwlock)->lock);
   failure_mutex:
-  free(rwlock);
+  free(*rwlock);
   failure_malloc:
-  return NULL;
+  return -1;
 }
 
 void melon_rwlock_destroy(melon_rwlock * rwlock)

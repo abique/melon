@@ -51,7 +51,7 @@ static void melon_io_manager_handle(struct epoll_event * event)
   if (event->events & (EPOLLOUT))
   {
     // release one read from the write queue
-    melon_dlist_pop(g_melon.io[event->data.fd].read_queue, fiber, );
+    melon_dlist_pop(g_melon.io[event->data.fd].write_queue, fiber, );
     melon_io_manager_release_fiber(fiber);
   }
 

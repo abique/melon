@@ -13,30 +13,53 @@ int melon_io_manager_init(void)
   return 0;
 }
 
+static void melon_io_manager_release_fiber(melon_fiber * fiber)
+{
+  if (!fiber)
+    return;
+  fiber->waited_event = kEventNone;
+  if (fiber->timer > 0)
+    melon_timer_remove_locked(fiber);
+  melon_sched_ready_locked(fiber);
+}
+
 static void melon_io_manager_handle(struct epoll_event * event)
 {
-  melon_fiber * curr = g_melon.io[event->data.fd].fibers;
-  melon_fiber * next = NULL;
+  melon_fiber * fiber = NULL;
 
-  for (; curr; curr = next)
+  if (event->events & (EPOLLRDHUP | EPOLLERR | EPOLLHUP))
   {
-    if (curr->next == curr ||
-        curr->next == g_melon.io[event->data.fd].fibers)
-      next = NULL;
-    else
-      next = curr->next;
+    // flush everything
+#define RELEASE_LOOP(Queue)                     \
+    do {                                        \
+      melon_dlist_pop(Queue, fiber, );          \
+      if (!fiber)                               \
+        break;                                  \
+      melon_io_manager_release_fiber(fiber);    \
+    } while (1)
 
-    if ((event->events & (EPOLLRDHUP | EPOLLERR | EPOLLHUP)) ||
-        (curr->waited_event & kEventIoRead && (event->events & (EPOLLIN | EPOLLPRI))) ||
-        (curr->waited_event & kEventIoWrite && (event->events & (EPOLLOUT))))
-    {
-      curr->waited_event = kEventNone;
-      melon_dlist_unlink(g_melon.io[event->data.fd].fibers, curr, );
-      if (curr->timer > 0)
-        melon_timer_remove_locked(curr);
-      melon_sched_ready_locked(curr);
-    }
+    RELEASE_LOOP(g_melon.io[event->data.fd].read_queue);
+    RELEASE_LOOP(g_melon.io[event->data.fd].write_queue);
+#undef RELEASE_LOOP
   }
+  if (event->events & (EPOLLIN | EPOLLPRI))
+  {
+    // release one read from the read queue
+    melon_dlist_pop(g_melon.io[event->data.fd].read_queue, fiber, );
+    melon_io_manager_release_fiber(fiber);
+  }
+  if (event->events & (EPOLLOUT))
+  {
+    // release one read from the write queue
+    melon_dlist_pop(g_melon.io[event->data.fd].read_queue, fiber, );
+    melon_io_manager_release_fiber(fiber);
+  }
+
+  event->events = EPOLLONESHOT |
+    (g_melon.io[event->data.fd].read_queue ? EPOLLIN : 0) |
+    (g_melon.io[event->data.fd].write_queue ? EPOLLOUT : 0);
+  if (event->events != EPOLLONESHOT)
+    epoll_ctl(g_melon.epoll_fd, EPOLL_CTL_MOD, event->data.fd, event);
 }
 
 void * melon_io_manager_loop(void * dummy)
@@ -90,11 +113,14 @@ struct waitfor_ctx
 static void waitfor_cb(struct waitfor_ctx * ctx)
 {
   ctx->timeout = 1;
-  melon_dlist_unlink(g_melon.io[ctx->fildes].fibers, ctx->fiber, );
+  if (ctx->fiber->waited_event & kEventIoRead)
+    melon_dlist_unlink(g_melon.io[ctx->fildes].read_queue, ctx->fiber, );
+  else if (ctx->fiber->waited_event & kEventIoWrite)
+    melon_dlist_unlink(g_melon.io[ctx->fildes].write_queue, ctx->fiber, );
   melon_sched_ready_locked(ctx->fiber);
 }
 
-int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout)
+int melon_io_manager_waitfor(int fildes, int waited_event, melon_time_t timeout)
 {
   struct waitfor_ctx ctx;
   melon_fiber *      self = g_current_fiber;
@@ -103,9 +129,11 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
   pthread_mutex_lock(&g_melon.lock);
 
   struct epoll_event ep_event;
-  ep_event.events = (waited_events & kEventIoRead ? EPOLLIN : 0) |
-    (waited_events & kEventIoWrite ? EPOLLOUT : 0) |
-    EPOLLONESHOT;
+  ep_event.events = EPOLLONESHOT |
+    (g_melon.io[fildes].read_queue ? EPOLLIN : 0) |
+    (g_melon.io[fildes].write_queue ? EPOLLOUT : 0) |
+    (waited_event & kEventIoRead ? EPOLLIN : 0) |
+    (waited_event & kEventIoWrite ? EPOLLOUT : 0);
   ep_event.data.fd = fildes;
   ctl:
   if (epoll_ctl(g_melon.epoll_fd,
@@ -127,10 +155,15 @@ int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout
     return -errno;
   }
 
-  self->waited_event = waited_events;
+  self->waited_event = waited_event;
   self->io_canceled  = 0;
   g_melon.io[fildes].is_in_epoll = 1;
-  melon_dlist_push(g_melon.io[fildes].fibers, self, );
+  if (waited_event & kEventIoRead)
+    melon_dlist_push(g_melon.io[fildes].read_queue, self, );
+  else if (waited_event & kEventIoWrite)
+    melon_dlist_push(g_melon.io[fildes].write_queue, self, );
+  else
+    assert(0 && "invalid waited_event");
 
   if (timeout > 0)
   {

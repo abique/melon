@@ -13,16 +13,12 @@
 
 #include "private.h"
 
-int melon_close(int fildes)
+static void melon_close_flush_queue(melon_fiber ** queue)
 {
-  assert(fildes >= 0);
-  int ret = pthread_mutex_lock(&g_melon.lock);
-  assert(!ret);
-
-  melon_fiber * curr = g_melon.io[fildes].fibers;
+  melon_fiber * curr = *queue;
   while (1)
   {
-    melon_dlist_pop(g_melon.io[fildes].fibers, curr, );
+    melon_dlist_pop(*queue, curr, );
     if (!curr)
       break;
     curr->waited_event = kEventNone;
@@ -31,6 +27,16 @@ int melon_close(int fildes)
     curr->io_canceled = 1;
     melon_sched_ready_locked(curr);
   }
+}
+
+int melon_close(int fildes)
+{
+  assert(fildes >= 0);
+  int ret = pthread_mutex_lock(&g_melon.lock);
+  assert(!ret);
+
+  melon_close_flush_queue(&g_melon.io[fildes].read_queue);
+  melon_close_flush_queue(&g_melon.io[fildes].write_queue);
   g_melon.io[fildes].is_in_epoll = 0;
 
   pthread_mutex_unlock(&g_melon.lock);
@@ -43,18 +49,8 @@ void melon_cancelio(int fildes)
   int ret = pthread_mutex_lock(&g_melon.lock);
   assert(!ret);
 
-  melon_fiber * curr = g_melon.io[fildes].fibers;
-  while (1)
-  {
-    melon_dlist_pop(g_melon.io[fildes].fibers, curr, );
-    if (!curr)
-      break;
-    curr->waited_event = kEventNone;
-    if (curr->timer > 0)
-      melon_timer_remove_locked(curr);
-    curr->io_canceled = 1;
-    melon_sched_ready_locked(curr);
-  }
+  melon_close_flush_queue(&g_melon.io[fildes].read_queue);
+  melon_close_flush_queue(&g_melon.io[fildes].write_queue);
   pthread_mutex_unlock(&g_melon.lock);
 }
 

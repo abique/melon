@@ -127,7 +127,8 @@ extern "C" {
 
   typedef struct melon_fd
   {
-    melon_fiber * fibers;   // linked list
+    melon_fiber * read_queue;  // linked list of fibers waiting for a read event
+    melon_fiber * write_queue; // linked list of fibers waiting for a write event
     int           is_in_epoll; // is in epoll
   } melon_fd;
 
@@ -183,7 +184,7 @@ extern "C" {
   int melon_io_manager_init(void);
   void * melon_io_manager_loop(void *);
   void melon_io_manager_deinit(void);
-  int melon_io_manager_waitfor(int fildes, int waited_events, melon_time_t timeout);
+  int melon_io_manager_waitfor(int fildes, int waited_event, melon_time_t timeout);
 
   /** @return 0 on success */
   int melon_timer_manager_init(void);

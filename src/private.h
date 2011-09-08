@@ -22,18 +22,6 @@ extern "C" {
     kEventTimer = 0x8,
   } MelonEvent;
 
-  /* enum MelonFiberState */
-  /* { */
-  /*   kInit, */
-  /*   kReady, */
-  /*   kRunning, */
-  /*   kIoWaiting, */
-  /*   kMutexWaiting, */
-  /*   kCondWaiting, */
-  /*   kSleeping, */
-  /*   kFinished */
-  /* }; */
-
   typedef void (*melon_callback)(void * ctx);
 
   struct melon_event
@@ -42,13 +30,22 @@ extern "C" {
     enum MelonEvent      event;
   };
 
+# define MUTEX_ATTR                             \
+  int is_recursive
+
+  struct melon_mutexattr
+  {
+    MUTEX_ATTR;
+  };
+
   struct melon_mutex
   {
     melon_spinlock lock;
     melon_fiber *  owner;
     melon_fiber *  lock_queue; /* dlist for fast removal in timedlock */
-    int            is_recursive;
     int            lock_count;
+
+    MUTEX_ATTR;
   };
 
   struct melon_rwlock
@@ -67,20 +64,47 @@ extern "C" {
     melon_fiber *  wait_queue;
   };
 
+# define SEM_ATTR                               \
+  int left
+
+  struct melon_semattr
+  {
+    SEM_ATTR;
+  };
+
   struct melon_sem
   {
     melon_mutex * lock;
     melon_cond  * cond;
-    int           left;
-    int           nb; // sanity check
     melon_fiber * queue;
+    int           nb; // sanity check
+
+    SEM_ATTR;
+  };
+
+# define BARRIER_ATTR                           \
+  int count
+
+  struct melon_barrierattr
+  {
+    BARRIER_ATTR;
   };
 
   struct melon_barrier
   {
     melon_mutex * lock;
     melon_cond *  cond;
-    int           count;
+
+    BARRIER_ATTR;
+  };
+
+# define FIBER_ATTR                             \
+  const char *   name;                          \
+  uint32_t       stack_size
+
+  struct melon_fiberattr
+  {
+    FIBER_ATTR;
   };
 
   struct melon_fiber
@@ -90,7 +114,6 @@ extern "C" {
     melon_fiber *  prev;
     ucontext_t     ctx;
     MelonEvent     waited_event;
-    const char *   name;
     int            io_canceled;
 
     /* start callback */
@@ -123,6 +146,8 @@ extern "C" {
     melon_cond *         join_cond;
     int                  join_is_detached;
     int                  join_is_finished;
+
+    FIBER_ATTR;
   };
 
   typedef struct melon_fd

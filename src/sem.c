@@ -4,31 +4,56 @@
 
 #include "private.h"
 
-melon_sem * melon_sem_new(int nb)
+int melon_semattr_init(melon_semattr ** attr)
 {
-  assert(nb > 0);
+  *attr = malloc(sizeof (**attr));
+  if (!*attr)
+    return -1;
+  (*attr)->left = 0;
+  return 0;
+}
 
-  melon_sem * sem = malloc(sizeof (*sem));
-  if (!sem)
-    return NULL;
+void melon_semattr_destroy(melon_semattr * attr)
+{
+  free(attr);
+}
 
-  sem->lock = melon_mutex_new(0);
-  if (!sem->lock)
+void melon_semattr_setnb(melon_semattr * attr, int nb)
+{
+  attr->left = nb;
+}
+
+int melon_semattr_getnb(melon_semattr * attr)
+{
+  return attr->left;
+}
+
+int melon_sem_init(melon_sem ** sem, melon_semattr * attr)
+{
+  if (attr)
+    assert(attr->left > 0);
+
+  *sem = malloc(sizeof (**sem));
+  if (!*sem)
+    return -1;
+
+  (*sem)->lock = melon_mutex_new(0);
+  if (!(*sem)->lock)
     goto failure_mutex;
 
-  sem->cond = melon_cond_new();
-  if (sem->cond)
+  (*sem)->cond = melon_cond_new();
+  if ((*sem)->cond)
     goto failure_cond;
 
-  sem->left  = nb;
-  sem->queue = NULL;
-  return sem;
+  (*sem)->left  = attr ? attr->left : 1;
+  (*sem)->queue = NULL;
+  return 0;
 
   failure_cond:
-  melon_mutex_destroy(sem->lock);
+  melon_mutex_destroy((*sem)->lock);
   failure_mutex:
-  free(sem);
-  return NULL;
+  free(*sem);
+  return -1;
 }
 
 void melon_sem_destroy(melon_sem * sem)

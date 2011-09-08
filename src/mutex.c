@@ -3,17 +3,54 @@
 #include <errno.h>
 #include "private.h"
 
-melon_mutex * melon_mutex_new(int is_recursive)
+int melon_mutexattr_init(melon_mutexattr ** attr)
 {
-  melon_mutex * mutex = malloc(sizeof (*mutex));
-  if (!mutex)
-    return NULL;
-  melon_spin_init(&mutex->lock);
-  mutex->owner        = NULL;
-  mutex->lock_queue   = NULL;
-  mutex->is_recursive = is_recursive;
-  mutex->lock_count   = 0;
-  return mutex;
+  *attr = malloc(sizeof (**attr));
+  if (!attr)
+    return -1;
+
+  (*attr)->is_recursive = 0;
+  return 0;
+}
+
+void melon_mutexattr_destroy(melon_mutexattr * attr)
+{
+  free(attr);
+}
+
+void melon_mutexattr_settype(melon_mutexattr * attr, int type)
+{
+  switch (type)
+  {
+  case MELON_MUTEX_NORMAL:
+    attr->is_recursive = 0;
+    break;
+
+  case MELON_MUTEX_RECURSIVE:
+    attr->is_recursive = 1;
+    break;
+
+  default:
+    assert(0 && "invalid type value");
+  }
+}
+
+int melon_mutexattr_gettype(melon_mutexattr * attr)
+{
+  return attr->is_recursive;
+}
+
+int melon_mutex_init(melon_mutex ** mutex, melon_mutexattr * attr)
+{
+  *mutex = malloc(sizeof (*mutex));
+  if (!*mutex)
+    return 1;
+  melon_spin_init(&(*mutex)->lock);
+  (*mutex)->owner        = NULL;
+  (*mutex)->lock_queue   = NULL;
+  (*mutex)->lock_count   = 0;
+  (*mutex)->is_recursive = attr ? attr->is_recursive : 0;
+  return 0;
 }
 
 void melon_mutex_destroy(struct melon_mutex * mutex)

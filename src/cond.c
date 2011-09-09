@@ -144,13 +144,13 @@ int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t t
 }
 
 // TODO use pthread only for timed waits
-int melon_cond_signalnb(melon_cond * condition, const int nb)
+int melon_cond_signalnb(melon_cond * condition, const uint32_t nb)
 {
   pthread_mutex_lock(&g_melon.lock);
   melon_spin_lock(&condition->lock);
   melon_fiber * list    = condition->wait_queue;
   condition->wait_queue = NULL;
-  int nwokeup           = 0;
+  uint32_t nwokeup      = 0;
 
   melon_fiber * fiber = NULL;
   while (nb == 0 || nwokeup < nb)

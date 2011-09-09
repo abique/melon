@@ -264,7 +264,7 @@ extern "C" {
     }                                                           \
                                                                 \
     __melon_main_data data = { argc, argv, 0 };;                \
-    if (melon_fiber_startlight(__main_wrapper, &data))          \
+    if (melon_fiber_createlight(NULL, __main_wrapper, &data))   \
     {                                                           \
       fprintf(stderr, "failed to create the first fiber.\n");   \
       melon_deinit();                                           \

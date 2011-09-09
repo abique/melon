@@ -12,6 +12,31 @@
 
 #include "private.h"
 
+int melon_fiberattr_init(melon_fiberattr ** attr)
+{
+  *attr = malloc(sizeof (**attr));
+  if (!*attr)
+    return -1;
+  (*attr)->name = "(none)";
+  (*attr)->stack_size = melon_stack_size();
+  return 0;
+}
+
+void melon_fiberattr_destroy(melon_fiberattr * attr)
+{
+  free(attr);
+}
+
+void melon_fiberattr_setstacksize(melon_fiberattr * attr, uint32_t size)
+{
+  attr->stack_size = size;
+}
+
+int melon_fiberattr_getstacksize(melon_fiberattr * attr)
+{
+  return attr->stack_size;
+}
+
 melon_fiber * melon_fiber_self(void)
 {
   return g_current_fiber;
@@ -62,9 +87,10 @@ static void melon_fiber_wrapper(void)
   assert(0 && "should never be reached");
 }
 
-static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
-                                         void * ctx,
-                                         int    joinable)
+static melon_fiber * __melon_fiber_start(melon_fiberattr * attr,
+                                         void *            (*fct)(void *),
+                                         void *            ctx,
+                                         int               joinable)
 {
   assert(fct);
 
@@ -78,7 +104,7 @@ static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
   fiber->timer_next       = NULL;
   fiber->timer_prev       = NULL;
   fiber->waited_event     = kEventNone;
-  fiber->name             = "(none)";
+  fiber->name             = attr ? attr->name : "(none)";
   fiber->io_canceled      = 0;
   fiber->start_cb         = fct;
   fiber->start_ctx        = ctx;
@@ -126,14 +152,15 @@ static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
   return NULL;
 }
 
-int melon_fiber_startlight(void * (*fct)(void *), void * ctx)
+int melon_fiber_createlight(melon_fiberattr * attr, void * (*fct)(void *), void * ctx)
 {
-  return __melon_fiber_start(fct, ctx, 0) ? 0 : -1;
+  return __melon_fiber_start(attr, fct, ctx, 0) ? 0 : -1;
 }
 
-melon_fiber * melon_fiber_start(void * (*fct)(void *), void * ctx)
+int melon_fiber_create(melon_fiber ** fiber, melon_fiberattr * attr, void * (*fct)(void *), void * ctx)
 {
-  return __melon_fiber_start(fct, ctx, 1);
+  *fiber = __melon_fiber_start(attr, fct, ctx, 1);
+  return *fiber ? 0 : -1;
 }
 
 const char * melon_fiber_name(const melon_fiber * fiber)

@@ -59,13 +59,18 @@ extern "C" {
    * @name Fiber
    * @{
    */
+  int melon_fiberattr_init(melon_fiberattr ** attr);
+  void melon_fiberattr_destroy(melon_fiberattr * attr);
+  void melon_fiberattr_setstacksize(melon_fiberattr * attr, uint32_t size);
+  int melon_fiberattr_getstacksize(melon_fiberattr * attr);
+
   /** creates a new detached fiber
    * @return 0 on success */
-  int melon_fiber_startlight(void * (*fct)(void *), void * ctx);
+  int melon_fiber_createlight(melon_fiberattr * attr, void * (*fct)(void *), void * ctx);
 
   /** if you don't need to join the fiber, prefer \ref melon_fiber_startlight
    * which is faster */
-  melon_fiber * melon_fiber_start(void * (*fct)(void *), void * ctx);
+  int melon_fiber_create(melon_fiber ** fiber, melon_fiberattr * attr, void * (*fct)(void *), void * ctx);
   void melon_fiber_join(melon_fiber * fiber, void ** retval);
   int melon_fiber_tryjoin(melon_fiber * fiber, void ** retval);
   int melon_fiber_timedjoin(melon_fiber * fiber, void ** retval, melon_time_t timeout);
@@ -267,7 +272,7 @@ extern "C" {
     }                                                           \
     melon_wait();                                               \
     melon_deinit();                                             \
-    return 0;                                                   \
+    return data.retval;                                         \
   }                                                             \
                                                                 \
   static int __melon_main(int Argc, char ** Argv)

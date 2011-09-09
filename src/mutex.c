@@ -6,7 +6,7 @@
 int melon_mutexattr_init(melon_mutexattr ** attr)
 {
   *attr = malloc(sizeof (**attr));
-  if (!attr)
+  if (!*attr)
     return -1;
 
   (*attr)->is_recursive = 0;
@@ -32,6 +32,7 @@ void melon_mutexattr_settype(melon_mutexattr * attr, int type)
 
   default:
     assert(0 && "invalid type value");
+    break;
   }
 }
 
@@ -42,9 +43,9 @@ int melon_mutexattr_gettype(melon_mutexattr * attr)
 
 int melon_mutex_init(melon_mutex ** mutex, melon_mutexattr * attr)
 {
-  *mutex = malloc(sizeof (*mutex));
+  *mutex = malloc(sizeof (**mutex));
   if (!*mutex)
-    return 1;
+    return -1;
   melon_spin_init(&(*mutex)->lock);
   (*mutex)->owner        = NULL;
   (*mutex)->lock_queue   = NULL;

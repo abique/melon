@@ -125,7 +125,12 @@ int melon_io_manager_waitfor(int fildes, int waited_event, melon_time_t timeout)
   struct waitfor_ctx ctx;
   melon_fiber *      self = g_current_fiber;
 
-  assert(fildes >= 0);
+  if (fildes < 0)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
   pthread_mutex_lock(&g_melon.lock);
 
   struct epoll_event ep_event;

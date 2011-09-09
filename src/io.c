@@ -112,7 +112,6 @@ int64_t melon_preadv(int fildes, const struct iovec *iov, int iovcnt, int64_t of
 
 int melon_connect(int socket, const struct sockaddr *address, socklen_t address_len, melon_time_t timeout)
 {
-  fcntl(socket, F_SETFL, O_NONBLOCK);
   if (!connect(socket, address, address_len))
     return 0;
 

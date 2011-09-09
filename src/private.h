@@ -65,7 +65,7 @@ extern "C" {
   };
 
 # define SEM_ATTR                               \
-  int left
+  uint32_t left
 
   struct melon_semattr
   {
@@ -77,13 +77,13 @@ extern "C" {
     melon_mutex * lock;
     melon_cond  * cond;
     melon_fiber * queue;
-    int           nb; // sanity check
+    uint32_t      nb; // sanity check
 
     SEM_ATTR;
   };
 
 # define BARRIER_ATTR                           \
-  int count
+  uint32_t count
 
   struct melon_barrierattr
   {

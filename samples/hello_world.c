@@ -22,7 +22,7 @@ int main(void)
   if (melon_init(0)) // initialises melon, and use the default number of kernel threads
     return 1;
 
-  melon_fiber_startlight(my_fiber, NULL); // creates at least one fiber
+  melon_fiber_createlight(NULL, my_fiber, NULL); // creates at least one fiber
   // you can't use join/detach/lock/... from the main thread, you must be doing it
   // in a fiber thread.
 

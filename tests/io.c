@@ -52,8 +52,8 @@ int main(void)
   if (pipe(fd))
     return 1;
 
-  melon_fiber_startlight(fct1, NULL);
-  melon_fiber_startlight(fct2, NULL);
+  melon_fiber_createlight(NULL, fct1, NULL);
+  melon_fiber_createlight(NULL, fct2, NULL);
 
   melon_wait();
   melon_deinit();

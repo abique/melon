@@ -25,7 +25,7 @@ static void * fct1(void * dummy)
   assert(barrier);
 
   for (int i = 1; i <= 10; ++i)
-    melon_fiber_startlight(fct2, NULL + i);
+    melon_fiber_createlight(NULL, fct2, NULL + i);
   printf("slee(1)\n");
   melon_sleep(1);
   printf("wait()\n");
@@ -40,7 +40,7 @@ int main(void)
   if (melon_init(0))
     return 1;
 
-  melon_fiber_startlight(fct1, NULL);
+  melon_fiber_createlight(NULL, fct1, NULL);
 
   melon_wait();
   melon_deinit();

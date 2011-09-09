@@ -71,7 +71,7 @@ MELON_MAIN(argc, argv)
     }
     *data = client;
 
-    if (melon_fiber_startlight(handle_client, data))
+    if (melon_fiber_createlight(NULL, handle_client, data))
     {
       free(data);
       melon_close(client);

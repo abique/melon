@@ -27,7 +27,7 @@ static void * fct1(void * dummy)
   (void)dummy;
   printf("fct1: xx\n");
   melon_mutex_lock(mutex);
-  melon_fiber_startlight(fct2, NULL);
+  melon_fiber_createlight(NULL, fct2, NULL);
   printf("fct1: cond wait\n");
   melon_cond_wait(cond, mutex);
   printf("fct1: woke up, got val: %d\n", val);
@@ -41,7 +41,7 @@ int main(void)
     return 1;
   melon_mutex_init(&mutex, NULL);
   melon_cond_init(&cond, NULL);
-  melon_fiber_startlight(fct1, NULL);
+  melon_fiber_createlight(NULL, fct1, NULL);
   melon_wait();
   melon_mutex_destroy(mutex);
   melon_cond_destroy(cond);

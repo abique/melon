@@ -30,7 +30,7 @@ int main(void)
 
   melon_mutex_init(&mutex, NULL);
   for (int i = 1; i <= 1000; ++i)
-    if (melon_fiber_startlight(fct, NULL + i))
+    if (melon_fiber_createlight(NULL, fct, NULL + i))
       break;
 
   melon_wait();

@@ -21,7 +21,7 @@ static void * fct1(void * dummy)
   (void)dummy;
 
   printf("barrier_new()\n");
-  barrier = melon_barrier_new(11);
+  melon_barrier_init(&barrier, NULL, 11);
   assert(barrier);
 
   for (int i = 1; i <= 10; ++i)

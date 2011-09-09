@@ -48,8 +48,8 @@ int main(void)
 {
   if (melon_init(0))
     return 1;
-  mutex = melon_mutex_new(0);
-  cond = melon_cond_new();
+  melon_mutex_init(&mutex, NULL);
+  melon_cond_init(&cond, NULL);
   melon_fiber_startlight(fct1, NULL);
   melon_wait();
   melon_mutex_destroy(mutex);

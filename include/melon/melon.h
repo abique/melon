@@ -35,15 +35,15 @@ extern "C" {
    */
   /** initializes melon runtime
    * @return 0 on success, non zero else */
-  int melon_init(uint16_t nb_threads);
+  int melon_init(uint32_t nb_threads);
   /** blocks until there is no more fibers left in melon */
   void melon_wait(void);
   /** deinitialize melon */
   void melon_deinit(void);
   /** adds threads to the thread pool */
-  int melon_kthread_add(int16_t nb);
+  int melon_kthread_add(uint32_t nb);
   /** removes threads from the thread pool */
-  int melon_kthread_release(int16_t nb);
+  int melon_kthread_release(uint32_t nb);
   /** @} */
 
   /**
@@ -148,7 +148,7 @@ extern "C" {
   /** if nb == 1, then equivalent to melon_cond_signal, if nb == 0
    * then equivalent to melon_cond_broadcast
    * @return the number of woke up fibers */
-  int melon_cond_signalnb(melon_cond * condition, int nb);
+  int melon_cond_signalnb(melon_cond * condition, uint32_t nb);
   /** @return the number of woke up fibers */
   int melon_cond_broadcast(melon_cond * condition);
   /** @} */
@@ -159,26 +159,26 @@ extern "C" {
    */
   int melon_semattr_init(melon_semattr ** attr);
   void melon_semattr_destroy(melon_semattr * attr);
-  void melon_semattr_setnb(melon_semattr * attr, int nb);
-  int melon_semattr_getnb(melon_semattr * attr);
 
-  int melon_sem_init(melon_sem ** sem, melon_semattr * attr);
-  melon_sem * melon_sem_new(int nb);
+  int melon_sem_init(melon_sem ** sem, melon_semattr * attr, uint32_t nb);
   void melon_sem_destroy(melon_sem * sem);
-  void melon_sem_acquire(melon_sem * sem, int nb);
-  int melon_sem_tryacquire(melon_sem * sem, int nb);
-  int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout);
-  void melon_sem_release(melon_sem * sem, int nb);
+  void melon_sem_acquire(melon_sem * sem, uint32_t nb);
+  int melon_sem_tryacquire(melon_sem * sem, uint32_t nb);
+  int melon_sem_timedacquire(melon_sem * sem, uint32_t nb, melon_time_t timeout);
+  void melon_sem_release(melon_sem * sem, uint32_t nb);
   /** @} */
 
   /**
    * @name Barrier
    * @{
    */
-  melon_barrier * melon_barrier_new(uint16_t nb);
+  int melon_barrierattr_init(melon_barrierattr ** attr);
+  void melon_barrierattr_destroy(melon_barrierattr * attr);
+
+  int melon_barrier_init(melon_barrier ** barrier, melon_barrierattr * attr, uint32_t nb);
   void melon_barrier_destroy(melon_barrier * barrier);
-  void melon_barrier_add(melon_barrier * barrier, uint16_t nb);
-  void melon_barrier_release(melon_barrier * barrier, uint16_t nb);
+  void melon_barrier_add(melon_barrier * barrier, uint32_t nb);
+  void melon_barrier_release(melon_barrier * barrier, uint32_t nb);
   void melon_barrier_wait(melon_barrier * barrier);
   /** @} */
 

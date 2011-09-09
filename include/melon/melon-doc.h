@@ -90,12 +90,12 @@ Fiber
 </tr>
 <tr>
 <td>pthread_create</td>
-<td>\ref melon_fiber_start</td>
+<td>\ref melon_fiber_create</td>
 <td></td>
 </tr>
 <tr>
 <td>pthread_create + pthread_detach</td>
-<td>\ref melon_fiber_startlight</td>
+<td>\ref melon_fiber_createlight</td>
 <td>if you don't need join the fiber, this one is really faster</td>
 </tr>
 <tr>
@@ -167,7 +167,7 @@ Mutex
 </tr>
 <tr>
 <td>pthread_mutex_init</td>
-<td>\ref melon_mutex_new</td>
+<td>\ref melon_mutex_init</td>
 <td></td>
 </tr>
 <tr>
@@ -208,7 +208,7 @@ RWLock
 </tr>
 <tr>
 <td>pthread_rwlock_init</td>
-<td>\ref melon_rwlock_new</td>
+<td>\ref melon_rwlock_init</td>
 <td></td>
 </tr>
 <tr>
@@ -264,7 +264,7 @@ Condition
 </tr>
 <tr>
 <td>pthread_cond_init</td>
-<td>\ref melon_cond_new</td>
+<td>\ref melon_cond_init</td>
 <td></td>
 </tr>
 <tr>
@@ -310,7 +310,7 @@ Barrier
 </tr>
 <tr>
 <td>pthread_barrier_init</td>
-<td>\ref melon_barrier_new</td>
+<td>\ref melon_barrier_init</td>
 <td></td>
 </tr>
 <tr>
@@ -346,7 +346,7 @@ Semaphore
 </tr>
 <tr>
 <td></td>
-<td>\ref melon_sem_new</td>
+<td>\ref melon_sem_init</td>
 <td></td>
 </tr>
 <tr>

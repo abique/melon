@@ -1,5 +1,8 @@
 2011-09-09  Alexandre Bique  <bique.alexandre@gmail.com>
 
+	* release: 0.10.1
+	* io.c: melon_connect() should not set NONBLOCK
+	* iomanager.c: replace assertion with proper error handling
 	* release: 0.10.0 new API.
 	* melon.h: refactoring API to make the library more pthread like
 

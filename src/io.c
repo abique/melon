@@ -165,8 +165,6 @@ int64_t melon_sendmsg(int socket, const struct msghdr *message, int flags, melon
 
 int64_t melon_sendfile(int out_fd, int in_fd, int64_t *offset, uint64_t count, melon_time_t timeout)
 {
-  if (melon_io_manager_waitfor(in_fd, kEventIoRead, timeout))
-    return -1;
   if (melon_io_manager_waitfor(out_fd, kEventIoWrite, timeout))
     return -1;
   return sendfile(out_fd, in_fd, offset, count);

@@ -17,18 +17,16 @@ void melon_rwlockattr_destroy(melon_rwlockattr * attr)
 
 int melon_rwlock_init(melon_rwlock ** rwlock, melon_rwlockattr * attr)
 {
+  (void)attr;
   *rwlock = malloc(sizeof (*rwlock));
   if (!*rwlock)
     goto failure_malloc;
 
-  (*rwlock)->lock = melon_mutex_new(0);
-  if (!(*rwlock)->lock)
+  if (melon_mutex_init(&(*rwlock)->lock, NULL))
     goto failure_mutex;
-  (*rwlock)->wcond = melon_cond_new();
-  if (!(*rwlock)->wcond)
+  if (melon_cond_init(&(*rwlock)->wcond, NULL))
     goto failure_cond1;
-  (*rwlock)->rcond = melon_cond_new();
-  if (!(*rwlock)->rcond)
+  if (melon_cond_init(&(*rwlock)->rcond, NULL))
     goto failure_cond2;
   (*rwlock)->lock_count = 0;
   (*rwlock)->wowner = NULL;

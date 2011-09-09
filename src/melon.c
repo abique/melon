@@ -8,9 +8,9 @@
 
 struct melon g_melon;
 
-int melon_init(uint16_t nb_threads)
+int melon_init(uint32_t nb_threads)
 {
-  unsigned i = 0;
+  uint32_t i = 0;
 
   /* default values */
   g_melon.stop = 0;

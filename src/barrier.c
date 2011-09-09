@@ -3,25 +3,35 @@
 
 #include "private.h"
 
-melon_barrier * melon_barrier_new(uint16_t nb)
+int melon_barrierattr_init(melon_barrierattr ** attr)
 {
-  melon_barrier * barrier = malloc(sizeof (*barrier));
-  if (!barrier)
-    return NULL;
-  barrier->lock = melon_mutex_new(0);
-  if (!barrier->lock)
+  *attr = NULL;
+  return 0;
+}
+
+void melon_barrierattr_destroy(melon_barrierattr * attr)
+{
+  free(attr);
+}
+
+int melon_barrier_init(melon_barrier ** barrier, melon_barrierattr * attr, uint32_t nb)
+{
+  (void)attr;
+  *barrier = malloc(sizeof (**barrier));
+  if (!(*barrier))
+    return -1;
+  if (melon_mutex_init(&(*barrier)->lock, NULL))
     goto failure_mutex;
-  barrier->cond = melon_cond_new();
-  if (!barrier->cond)
+  if (melon_cond_init(&(*barrier)->cond, NULL))
     goto failure_cond;
-  barrier->count = nb;
-  return barrier;
+  (*barrier)->count = nb;
+  return 0;
 
   failure_cond:
-  melon_mutex_destroy(barrier->lock);
+  melon_mutex_destroy((*barrier)->lock);
   failure_mutex:
-  free(barrier);
-  return NULL;
+  free(*barrier);
+  return -1;
 }
 
 void melon_barrier_destroy(melon_barrier * barrier)
@@ -35,12 +45,12 @@ void melon_barrier_destroy(melon_barrier * barrier)
   free(barrier);
 }
 
-void melon_barrier_add(melon_barrier * barrier, uint16_t nb)
+void melon_barrier_add(melon_barrier * barrier, uint32_t nb)
 {
   __sync_add_and_fetch(&barrier->count, nb);
 }
 
-void melon_barrier_release(melon_barrier * barrier, uint16_t nb)
+void melon_barrier_release(melon_barrier * barrier, uint32_t nb)
 {
   assert(nb <= barrier->count);
   if (__sync_add_and_fetch(&barrier->count, -nb) == 0)

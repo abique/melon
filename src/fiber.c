@@ -95,12 +95,10 @@ static melon_fiber * __melon_fiber_start(void * (*fct)(void *),
   melon_spin_init(&fiber->lock);
   if (joinable)
   {
-    fiber->join_mutex = melon_mutex_new(0);
-    if (!fiber->join_mutex)
+    if (melon_mutex_init(&fiber->join_mutex, NULL))
       goto failure_mutex;
 
-    fiber->join_cond = melon_cond_new();
-    if (!fiber->join_cond)
+    if (melon_cond_init(&fiber->join_cond, NULL))
       goto failure_cond;
   }
 

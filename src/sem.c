@@ -6,10 +6,7 @@
 
 int melon_semattr_init(melon_semattr ** attr)
 {
-  *attr = malloc(sizeof (**attr));
-  if (!*attr)
-    return -1;
-  (*attr)->left = 0;
+  *attr = NULL;
   return 0;
 }
 
@@ -18,34 +15,21 @@ void melon_semattr_destroy(melon_semattr * attr)
   free(attr);
 }
 
-void melon_semattr_setnb(melon_semattr * attr, int nb)
+int melon_sem_init(melon_sem ** sem, melon_semattr * attr, uint32_t nb)
 {
-  attr->left = nb;
-}
-
-int melon_semattr_getnb(melon_semattr * attr)
-{
-  return attr->left;
-}
-
-int melon_sem_init(melon_sem ** sem, melon_semattr * attr)
-{
-  if (attr)
-    assert(attr->left > 0);
+  (void)attr;
 
   *sem = malloc(sizeof (**sem));
   if (!*sem)
     return -1;
 
-  (*sem)->lock = melon_mutex_new(0);
-  if (!(*sem)->lock)
+  if (melon_mutex_init(&(*sem)->lock, NULL))
     goto failure_mutex;
 
-  (*sem)->cond = melon_cond_new();
-  if ((*sem)->cond)
+  if (melon_cond_init(&(*sem)->cond, NULL))
     goto failure_cond;
 
-  (*sem)->left  = attr ? attr->left : 1;
+  (*sem)->left  = nb;
   (*sem)->queue = NULL;
   return 0;
 
@@ -64,7 +48,7 @@ void melon_sem_destroy(melon_sem * sem)
   free(sem);
 }
 
-void melon_sem_acquire(melon_sem * sem, int nb)
+void melon_sem_acquire(melon_sem * sem, uint32_t nb)
 {
   int           in_queue = 0;
   melon_fiber * self     = melon_fiber_self();
@@ -92,7 +76,7 @@ void melon_sem_acquire(melon_sem * sem, int nb)
   }
 }
 
-void melon_sem_release(melon_sem * sem, int nb)
+void melon_sem_release(melon_sem * sem, uint32_t nb)
 {
   melon_mutex_lock(sem->lock);
   sem->left += nb;
@@ -110,7 +94,7 @@ void melon_sem_release(melon_sem * sem, int nb)
   melon_mutex_unlock(sem->lock);
 }
 
-int melon_sem_tryacquire(melon_sem * sem, int nb)
+int melon_sem_tryacquire(melon_sem * sem, uint32_t nb)
 {
   melon_mutex_lock(sem->lock);
   if (sem->left >= nb)
@@ -124,7 +108,7 @@ int melon_sem_tryacquire(melon_sem * sem, int nb)
   return -EAGAIN;
 }
 
-int melon_sem_timedacquire(melon_sem * sem, int nb, melon_time_t timeout)
+int melon_sem_timedacquire(melon_sem * sem, uint32_t nb, melon_time_t timeout)
 {
   int           in_queue = 0;
   melon_fiber * self     = melon_fiber_self();

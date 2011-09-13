@@ -24,7 +24,8 @@
 ** TODO kthread_release
 ** TODO fiber local storage ??
 * POSIX interfaces
-** TODO melon_close
+** DONE melon_close
+   CLOSED: [2011-09-13 Tue 11:57]
 ** DONE melon_sleep()
    CLOSED: [2011-07-20 Wed 00:17]
 ** DONE melon_usleep()
@@ -77,11 +78,14 @@
    CLOSED: [2011-07-19 Tue 16:07]
 ** DONE test io
    CLOSED: [2011-07-20 Wed 00:18]
-** TODO test rw mutex
-** TODO test semaphore
+** DONE test rw mutex
+   CLOSED: [2011-09-13 Tue 11:57]
+** DONE test semaphore
+   CLOSED: [2011-09-13 Tue 11:57]
 ** DONE test barrier
    CLOSED: [2011-07-22 Fri 16:01]
-** TODO test fiber_join/fiber_detach/...
+** DONE test fiber_join/fiber_detach/...
+   CLOSED: [2011-09-13 Tue 11:57]
 * Portability
 ** TODO port to opensolaris/solaris/openindiana
 ** TODO port to freebsd

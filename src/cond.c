@@ -44,18 +44,19 @@ void melon_cond_wait(melon_cond * condition, melon_mutex * mutex)
   /* save the lock count */
   int lock_count = mutex->lock_count;
 
-  /* unlock the mutex */
-  mutex->lock_count = 1;
-  melon_mutex_unlock(mutex);
-
   /* save the mutex to relock and its lock count */
   g_current_fiber->cond_mutex = mutex;
   self->lock_count            = lock_count;
+  self->timer                 = 0;
 
   /* push the fiber in the wait queue */
   melon_spin_lock(&condition->lock);
   melon_dlist_push(condition->wait_queue, self, );
   melon_spin_unlock(&condition->lock);
+
+  /* unlock the mutex */
+  mutex->lock_count = 1;
+  melon_mutex_unlock(mutex);
 
   /* wait for the wake up */
   melon_sched_next();
@@ -103,10 +104,6 @@ int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t t
   /* save the lock count */
   int lock_count = mutex->lock_count;
 
-  /* unlock the mutex */
-  mutex->lock_count = 1;
-  melon_mutex_unlock(mutex);
-
   /* save the mutex to relock and its lock count */
   g_current_fiber->cond_mutex = mutex;
   self->lock_count            = lock_count;
@@ -132,6 +129,10 @@ int melon_cond_timedwait(melon_cond * condition, melon_mutex * mutex, uint64_t t
   /* unlock */
   melon_spin_unlock(&condition->lock);
   pthread_mutex_unlock(&g_melon.lock);
+
+  /* unlock the mutex */
+  mutex->lock_count = 1;
+  melon_mutex_unlock(mutex);
 
   /* wait for the wake up */
   melon_sched_next();

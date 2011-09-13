@@ -42,7 +42,7 @@ int main(void)
   melon_mutex_init(&mutex, NULL);
   melon_cond_init(&cond, NULL);
 
-  for (int i = 0; i < 1000; ++i)
+  for (int i = 0; i < 1000000; ++i)
   {
     melon_fiber_createlight(NULL, fct1, NULL);
     melon_wait();

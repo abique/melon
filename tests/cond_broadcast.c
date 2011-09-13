@@ -41,8 +41,12 @@ int main(void)
     return 1;
   melon_mutex_init(&mutex, NULL);
   melon_cond_init(&cond, NULL);
-  melon_fiber_createlight(NULL, fct1, NULL);
-  melon_wait();
+
+  for (int i = 0; i < 1000; ++i)
+  {
+    melon_fiber_createlight(NULL, fct1, NULL);
+    melon_wait();
+  }
   melon_mutex_destroy(mutex);
   melon_cond_destroy(cond);
   melon_deinit();

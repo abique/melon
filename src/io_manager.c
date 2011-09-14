@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 
 #include "private.h"
 
@@ -134,7 +135,7 @@ int melon_io_manager_waitfor(int fildes, int waited_event, melon_time_t timeout)
   pthread_mutex_lock(&g_melon.lock);
 
   struct epoll_event ep_event;
-  ep_event.events = EPOLLONESHOT |
+  ep_event.events = EPOLLONESHOT | EPOLLET |
     (g_melon.io[fildes].read_queue ? EPOLLIN : 0) |
     (g_melon.io[fildes].write_queue ? EPOLLOUT : 0) |
     (waited_event & kEventIoRead ? EPOLLIN : 0) |
@@ -157,7 +158,8 @@ int melon_io_manager_waitfor(int fildes, int waited_event, melon_time_t timeout)
       write(STDERR_FILENO, "critical, don't forget to call melon_close()\n", 45);
       goto ctl;
     }
-    return -errno;
+    pthread_mutex_unlock(&g_melon.lock);
+    return -1;
   }
 
   self->waited_event = waited_event;

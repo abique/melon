@@ -79,7 +79,11 @@ static void melon_fiber_wrapper(void)
 
   /* decrement the fibers count and if 0, then broadcast the cond */
   if (__sync_add_and_fetch(&g_melon.fibers_count, -1) == 0)
+  {
+    pthread_mutex_lock(&g_melon.lock);
     pthread_cond_broadcast(&g_melon.fibers_count_zero);
+    pthread_mutex_unlock(&g_melon.lock);
+  }
 
   self->sched_next_cb  = (void(*)(void*))melon_fiber_destroy;
   self->sched_next_ctx = self;

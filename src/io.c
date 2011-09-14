@@ -31,7 +31,12 @@ static void melon_close_flush_queue(melon_fiber ** queue)
 
 int melon_close(int fildes)
 {
-  assert(fildes >= 0);
+  if (fildes < 0)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
   int ret = pthread_mutex_lock(&g_melon.lock);
   assert(!ret);
 
@@ -39,19 +44,26 @@ int melon_close(int fildes)
   melon_close_flush_queue(&g_melon.io[fildes].write_queue);
   g_melon.io[fildes].is_in_epoll = 0;
 
+  ret = close(fildes);
   pthread_mutex_unlock(&g_melon.lock);
-  return close(fildes);
+  return ret;
 }
 
-void melon_cancelio(int fildes)
+int melon_cancelio(int fildes)
 {
-  assert(fildes >= 0);
+  if (fildes < 0)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
   int ret = pthread_mutex_lock(&g_melon.lock);
   assert(!ret);
 
   melon_close_flush_queue(&g_melon.io[fildes].read_queue);
   melon_close_flush_queue(&g_melon.io[fildes].write_queue);
   pthread_mutex_unlock(&g_melon.lock);
+  return 0;
 }
 
 int64_t melon_write(int fildes, const void * data, uint64_t nbyte, melon_time_t timeout)

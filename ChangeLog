@@ -1,3 +1,8 @@
+2011-09-14  Alexandre Bique  <bique.alexandre@gmail.com>
+
+	* release: 0.10.3
+	* fixes: some race conditions
+
 2011-09-13  Alexandre Bique  <bique.alexandre@gmail.com>
 
 	* release: 0.10.2

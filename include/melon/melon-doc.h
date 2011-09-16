@@ -27,7 +27,7 @@ So you don't have to manage timeouts yourself.
 
 Melon is perfectly usable for a C++ programmer. Buf if you are looking for an
 object and RAII approach, then I suggest you to use
-<a href="https://github.com/babali/mimosa">Mimosa</a>.
+<a href="https://github.com/abique/mimosa">Mimosa</a>.
 
 @section ToKnow Things you may know before starting
 

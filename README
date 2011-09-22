@@ -32,3 +32,14 @@ Dependencies
  - solaris,windows/iocp [not implemented yet]
  - cmake
 
+How to cross compile on linux to windows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm -rf build-win32 &&
+mkdir build-win32 &&
+cd build-win32 &&
+cmake \
+-DCMAKE_SYSTEM_NAME=Windows \
+-DCMAKE_C_COMPILER=/usr/bin/i486-mingw32-gcc \
+-DCMAKE_RC_COMPILER=/usr/bin/i486-mingw32-windres \
+..
+

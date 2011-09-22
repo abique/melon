@@ -3,11 +3,27 @@
 
 # include <stdint.h>
 # include <unistd.h>
-# include <sys/uio.h>
-# include <sys/socket.h>
-# include <sys/sendfile.h>
 # include <fcntl.h>
 # include <stdio.h>
+
+# if __unix__
+#  include <sys/uio.h>
+#  include <sys/socket.h>
+#  include <sys/sendfile.h>
+# endif
+
+# if __WIN32__
+#  include <windows.h>
+#  include <winsock2.h>
+
+struct iovec
+{
+  void * iov_base;
+  size_t iov_len;
+};
+typedef int socklen_t;
+
+# endif
 
 # include "spinlock.h"
 

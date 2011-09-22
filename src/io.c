@@ -127,8 +127,10 @@ int melon_connect(int socket, const struct sockaddr *address, socklen_t address_
   if (!connect(socket, address, address_len))
     return 0;
 
+#if __unix__
   if (errno != EINPROGRESS)
     return -1;
+#endif
 
   if (melon_io_manager_waitfor(socket, kEventIoWrite, timeout))
     return -1;
@@ -160,6 +162,7 @@ int64_t melon_recvfrom(int socket, void *restrict buffer, uint64_t length,
   return recvfrom(socket, buffer, length, flags, address, address_len);
 }
 
+#if __unix__
 int64_t melon_recvmsg(int socket, struct msghdr *message, int flags, melon_time_t timeout)
 {
   if (melon_io_manager_waitfor(socket, kEventIoRead, timeout))
@@ -173,6 +176,7 @@ int64_t melon_sendmsg(int socket, const struct msghdr *message, int flags, melon
     return -1;
   return sendmsg(socket, message, flags);
 }
+#endif
 
 int64_t melon_sendfile(int out_fd, int in_fd, int64_t *offset, uint64_t count, melon_time_t timeout)
 {

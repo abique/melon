@@ -2,7 +2,10 @@
 # define CONFIG_MMAP_ALLOW_UNINITIALIZED
 #endif
 
-#include <sys/mman.h>
+#if __unix__
+# include <sys/mman.h>
+#endif
+
 #include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>

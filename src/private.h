@@ -1,8 +1,31 @@
 #ifndef MELON_PRIVATE_H
 # define MELON_PRIVATE_H
 
+# ifdef __linux__
+#  define MELON_LINUX   1
+#  define MELON_FREEBSD 0
+#  define MELON_SOLARIS 0
+#  define MELON_UNIX    1
+#  define MELON_WIN32   0
+# endif
+
+# ifdef __WIN32__
+#  define MELON_LINUX   0
+#  define MELON_FREEBSD 0
+#  define MELON_SOLARIS 0
+#  define MELON_UNIX    0
+#  define MELON_WIN32   1
+# endif
+
 # include <pthread.h>
-# include <ucontext.h>
+
+# if MELON_UNIX
+#  include <ucontext.h>
+# elif MELON_WIN32
+#  include "ucontext_win32.h"
+# else
+#  error "no makecontext() on this plateform"
+# endif
 
 # include "melon.h"
 # include "spinlock.h"

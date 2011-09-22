@@ -177,7 +177,9 @@ extern "C" {
   {
     melon_fiber * read_queue;  // linked list of fibers waiting for a read event
     melon_fiber * write_queue; // linked list of fibers waiting for a write event
+#if __linux__
     int           is_in_epoll; // is in epoll
+# endif
   } melon_fd;
 
   typedef struct melon
@@ -192,9 +194,11 @@ extern "C" {
     /* vector of io ctx */
     melon_fd * io;
 
+# ifdef __linux__
     /* epoll stuff */
     int       epoll_fd;
     pthread_t epoll_thread;
+# endif
 
     /* thread pool */
     uint32_t       threads_nb;

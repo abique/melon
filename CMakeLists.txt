@@ -6,6 +6,7 @@ enable_testing()
 
 file(STRINGS VERSION MELON_VERSION)
 message("melon version: ${MELON_VERSION}")
+message("system: ${CMAKE_SYSTEM_NAME}")
 
 add_definitions(-D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
 include_directories(include)
@@ -25,6 +26,10 @@ set(MELON_SRCS
   src/stream.c
   src/timer_manager.c
 )
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(MELON_SRCS ${MELON_SRCS} src/io_manager_epoll.c)
+endif()
 
 add_library(melon SHARED ${MELON_SRCS})
 target_link_libraries(melon pthread rt)

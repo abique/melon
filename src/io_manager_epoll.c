@@ -11,7 +11,7 @@ int melon_io_manager_init(void)
 {
   g_melon.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
   if (g_melon.epoll_fd < 0)
-    return NULL;
+    return -1;
 
   if (pthread_create(&g_melon.io_manager_thread, 0, melon_io_manager_loop, NULL))
   {

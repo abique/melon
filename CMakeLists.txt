@@ -8,7 +8,8 @@ file(STRINGS VERSION MELON_VERSION)
 message("melon version: ${MELON_VERSION}")
 message("system: ${CMAKE_SYSTEM_NAME}")
 
-add_definitions(-D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
+add_definitions(-D_GNU_SOURCE -D_LARGE_FILE -D_FILE_OFFSET_BITS=64
+                -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
 include_directories(include)
 
 set(MELON_SRCS
@@ -23,12 +24,17 @@ set(MELON_SRCS
   src/sched.c
   src/sem.c
   src/stack_alloc.c
-  src/stream.c
   src/timer_manager.c
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set(MELON_SRCS ${MELON_SRCS} src/io_manager_epoll.c)
+  set(MELON_SRCS ${MELON_SRCS}
+      src/io_manager_epoll.c
+      src/stream.c)
+endif()
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+  set(MELON_SRCS ${MELON_SRCS} src/io_manager_kqueue.c)
 endif()
 
 add_library(melon SHARED ${MELON_SRCS})

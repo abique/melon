@@ -9,9 +9,24 @@
 
 int melon_io_manager_init(void)
 {
-  if (pthread_create(&g_melon.epoll_thread, 0, melon_io_manager_loop, NULL))
+  g_melon.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  if (g_melon.epoll_fd < 0)
+    return NULL;
+
+  if (pthread_create(&g_melon.io_manager_thread, 0, melon_io_manager_loop, NULL))
+  {
+    close(g_melon.epoll_fd);
     return -1;
+  }
   return 0;
+}
+
+void melon_io_manager_deinit(void)
+{
+  close(g_melon.epoll_fd);
+  g_melon.epoll_fd = -1;
+  pthread_cancel(g_melon.io_manager_thread);
+  pthread_join(g_melon.io_manager_thread, NULL);
 }
 
 static void melon_io_manager_release_fiber(melon_fiber * fiber)
@@ -69,10 +84,6 @@ void * melon_io_manager_loop(void * dummy)
 
   struct epoll_event events[256];
 
-  g_melon.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
-  if (g_melon.epoll_fd < 0)
-    return NULL;
-
   while (!g_melon.stop)
   {
     int count = epoll_wait(g_melon.epoll_fd, events,
@@ -94,14 +105,6 @@ void * melon_io_manager_loop(void * dummy)
     assert(!ret);
   }
   return 0;
-}
-
-void melon_io_manager_deinit(void)
-{
-  close(g_melon.epoll_fd);
-  g_melon.epoll_fd = -1;
-  pthread_cancel(g_melon.epoll_thread);
-  pthread_join(g_melon.epoll_thread, NULL);
 }
 
 struct waitfor_ctx

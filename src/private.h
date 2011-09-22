@@ -1,27 +1,11 @@
 #ifndef MELON_PRIVATE_H
 # define MELON_PRIVATE_H
 
-# ifdef __linux__
-#  define MELON_LINUX   1
-#  define MELON_FREEBSD 0
-#  define MELON_SOLARIS 0
-#  define MELON_UNIX    1
-#  define MELON_WIN32   0
-# endif
-
-# ifdef __WIN32__
-#  define MELON_LINUX   0
-#  define MELON_FREEBSD 0
-#  define MELON_SOLARIS 0
-#  define MELON_UNIX    0
-#  define MELON_WIN32   1
-# endif
-
 # include <pthread.h>
 
-# if MELON_UNIX
+# if __unix__
 #  include <ucontext.h>
-# elif MELON_WIN32
+# elif __WIN32__
 #  include "ucontext_win32.h"
 # else
 #  error "no makecontext() on this plateform"
@@ -194,11 +178,14 @@ extern "C" {
     /* vector of io ctx */
     melon_fd * io;
 
+    /* io_manager stuff */
 # ifdef __linux__
-    /* epoll stuff */
     int       epoll_fd;
-    pthread_t epoll_thread;
 # endif
+# ifdef __FreeBSD__
+    int       kqueue_fd;
+# endif
+    pthread_t io_manager_thread;
 
     /* thread pool */
     uint32_t       threads_nb;

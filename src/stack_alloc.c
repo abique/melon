@@ -1,10 +1,21 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <errno.h>
+#include <string.h>
+
 #include "private.h"
 
 #ifndef MAP_UNINITIALIZED
 # define MAP_UNINITIALIZED 0x0
+#endif
+
+#ifndef MAP_ANONYMOUS
+# define MAP_ANONYMOUS 0x0
+#endif
+
+#ifndef MAP_ANON
+# define MAP_ANON 0x0
 #endif
 
 #ifndef SIGSTKSZ
@@ -24,7 +35,6 @@ static int            g_stack_list_nb = 0;
 
 int melon_stack_init()
 {
-  assert(SIGSTKSZ % sysconf(_SC_PAGESIZE) == 0);
   g_stack_list = NULL;
   g_stack_list_nb = 0;
   melon_spin_init(&g_stack_list_lock);
@@ -54,8 +64,9 @@ void * melon_stack_alloc()
     melon_spin_unlock(&g_stack_list_lock);
     void * addr = mmap(NULL /* addr */, MELON_STACK_SIZE /* size */,
                        PROT_READ | PROT_WRITE | PROT_EXEC,
-                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED,
-                       0 /* fd */, 0 /* offset */);
+                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_ANON |
+		       MAP_UNINITIALIZED,
+                       -1 /* fd */, 0 /* offset */);
     if (addr == MAP_FAILED)
       return NULL;
     return addr;

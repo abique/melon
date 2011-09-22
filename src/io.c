@@ -42,7 +42,9 @@ int melon_close(int fildes)
 
   melon_close_flush_queue(&g_melon.io[fildes].read_queue);
   melon_close_flush_queue(&g_melon.io[fildes].write_queue);
+#ifdef __linux__
   g_melon.io[fildes].is_in_epoll = 0;
+#endif
 
   ret = close(fildes);
   pthread_mutex_unlock(&g_melon.lock);
@@ -162,7 +164,7 @@ int64_t melon_recvfrom(int socket, void *restrict buffer, uint64_t length,
   return recvfrom(socket, buffer, length, flags, address, address_len);
 }
 
-#if __unix__
+#ifdef __unix__
 int64_t melon_recvmsg(int socket, struct msghdr *message, int flags, melon_time_t timeout)
 {
   if (melon_io_manager_waitfor(socket, kEventIoRead, timeout))
@@ -178,6 +180,7 @@ int64_t melon_sendmsg(int socket, const struct msghdr *message, int flags, melon
 }
 #endif
 
+#ifdef __linux__
 int64_t melon_sendfile(int out_fd, int in_fd, int64_t *offset, uint64_t count, melon_time_t timeout)
 {
   if (melon_io_manager_waitfor(out_fd, kEventIoWrite, timeout))
@@ -211,3 +214,4 @@ int64_t melon_vmsplice(int fd, const struct iovec *iov,
     return -1;
   return vmsplice(fd, iov, nr_segs, flags);
 }
+#endif

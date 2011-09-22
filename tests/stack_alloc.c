@@ -40,6 +40,7 @@ int main(int argc, char ** argv)
 
   melon_stack_init();
   addrs[0] = melon_stack_alloc();
+  assert(addrs[0]);
   melon_stack_free(addrs[0]);
   melon_stack_deinit();
 

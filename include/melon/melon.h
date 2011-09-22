@@ -9,6 +9,9 @@
 # if __unix__
 #  include <sys/uio.h>
 #  include <sys/socket.h>
+# endif
+
+# if __linux__
 #  include <sys/sendfile.h>
 # endif
 
@@ -249,9 +252,10 @@ extern "C" {
                          unsigned long nr_segs, unsigned int flags, melon_time_t timeout);
 #  endif
 
+# if __linux__
   FILE * melon_fopen(const char * path, const char * mode, const melon_time_t * timeout);
   FILE * melon_fdopen(int fd, const char * mode, const melon_time_t * timeout);
-
+# endif
   /** @} */
 
 

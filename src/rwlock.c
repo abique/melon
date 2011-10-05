@@ -18,7 +18,7 @@ void melon_rwlockattr_destroy(melon_rwlockattr * attr)
 int melon_rwlock_init(melon_rwlock ** rwlock, melon_rwlockattr * attr)
 {
   (void)attr;
-  *rwlock = malloc(sizeof (*rwlock));
+  *rwlock = malloc(sizeof (**rwlock));
   if (!*rwlock)
     goto failure_malloc;
 

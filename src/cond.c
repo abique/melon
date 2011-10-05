@@ -17,7 +17,7 @@ void melon_condattr_destroy(melon_condattr * attr)
 int melon_cond_init(melon_cond ** cond, melon_condattr * attr)
 {
   (void)attr;
-  *cond = malloc(sizeof (*cond));
+  *cond = malloc(sizeof (**cond));
   if (!*cond)
     return -1;
   melon_spin_init(&(*cond)->lock);

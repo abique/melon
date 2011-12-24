@@ -9,7 +9,8 @@ message("melon version: ${MELON_VERSION}")
 message("system: ${CMAKE_SYSTEM_NAME}")
 
 add_definitions(-D_GNU_SOURCE -D_LARGE_FILE -D_FILE_OFFSET_BITS=64
-                -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra)
+                -D_LARGEFILE64_SOURCE -std=c99 -Wall -Wextra
+                -Werror=return-type -fsplit-stack)
 include_directories(include)
 
 set(MELON_SRCS

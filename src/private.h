@@ -22,11 +22,11 @@ extern "C" {
 
   typedef enum MelonEvent
   {
-    kEventNone = 0x0,
-    kEventIoRead = 0x1,
+    kEventNone    = 0x0,
+    kEventIoRead  = 0x1,
     kEventIoWrite = 0x2,
     kEventDestroy = 0x4,
-    kEventTimer = 0x8,
+    kEventTimer   = 0x8,
   } MelonEvent;
 
   typedef void (*melon_callback)(void * ctx);
